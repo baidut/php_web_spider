@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Php web spider by baidut</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Php web spider</h1>
+        <h2>php网络蜘蛛，信息收集工具A web spider, using php, based on cURL &amp; simple html dom.</h2>
+        <a href="https://github.com/baidut/php_web_spider" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>
+<a id="php_web_spider" class="anchor" href="#php_web_spider" aria-hidden="true"><span class="octicon octicon-link"></span></a>php_web_spider</h1>
+
+<p>php网络蜘蛛，信息收集工具</p>
+
+<p>一个php实现的、基于cURL和simple html dom的轻量级网络爬虫</p>
+
+<p>A web spider, using php, based on cURL &amp; simple html dom.</p>
+
+<h3>
+<a id="配置" class="anchor" href="#%E9%85%8D%E7%BD%AE" aria-hidden="true"><span class="octicon octicon-link"></span></a>配置</h3>
+
+<div class="highlight highlight-php"><pre><span class="pl-s2"><span class="pl-c">// 简单配置 cookie文件目录和第三方网页分析库simple_html_dom的位置</span></span>
+<span class="pl-s2"><span class="pl-s3">define</span>(<span class="pl-s1"><span class="pl-pds">"</span>COOKIE_FILE<span class="pl-pds">"</span></span>,       <span class="pl-s1"><span class="pl-pds">"</span>./cookie.txt<span class="pl-pds">"</span></span>);</span>
+<span class="pl-s2"><span class="pl-s3">define</span>(<span class="pl-s1"><span class="pl-pds">"</span>PARSER_FILE<span class="pl-pds">"</span></span>,       <span class="pl-s1"><span class="pl-pds">'</span>./simple_html_dom.php<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s2"><span class="pl-c">// 添加php_web_spider，创建一个实例</span></span>
+<span class="pl-s2"><span class="pl-k">require_once</span>(<span class="pl-s1"><span class="pl-pds">'</span>./php_web_spider.php<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s2"><span class="pl-vo">$sp</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-s3">spider</span>;</span></pre></div>
+
+<h3>
+<a id="应用场合一-抓取检索结果" class="anchor" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E5%90%88%E4%B8%80-%E6%8A%93%E5%8F%96%E6%A3%80%E7%B4%A2%E7%BB%93%E6%9E%9C" aria-hidden="true"><span class="octicon octicon-link"></span></a>应用场合一 抓取检索结果</h3>
+
+<div class="highlight highlight-php"><pre><span class="pl-s2"><span class="pl-c">// eg1 可以直接get百度检索结果</span></span>
+<span class="pl-s2"><span class="pl-vo">$url</span> <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">'</span>http://www.baidu.com/s?ie=UTF-8&amp;wd=%E4%BD%A0%E5%A5%BD<span class="pl-pds">'</span></span>;</span>
+<span class="pl-s2"><span class="pl-s3">echo</span> <span class="pl-vo">$sp</span><span class="pl-k">-&gt;</span> fetch(<span class="pl-vo">$url</span>);</span>
+<span class="pl-s2"><span class="pl-c">// eg2 可以直接get豆瓣图书检索结果</span></span>
+<span class="pl-s2"><span class="pl-vo">$url</span> <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">'</span>http://book.douban.com/subject_search?search_text=php&amp;cat=1001<span class="pl-pds">'</span></span>;</span>
+<span class="pl-s2"><span class="pl-s3">echo</span> <span class="pl-vo">$sp</span><span class="pl-k">-&gt;</span> fetch(<span class="pl-vo">$url</span>);</span></pre></div>
+
+<h3>
+<a id="应用场合二-登陆抓取信息" class="anchor" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E5%90%88%E4%BA%8C-%E7%99%BB%E9%99%86%E6%8A%93%E5%8F%96%E4%BF%A1%E6%81%AF" aria-hidden="true"><span class="octicon octicon-link"></span></a>应用场合二 登陆，抓取信息</h3>
+
+<div class="highlight highlight-php"><pre><span class="pl-s2"><span class="pl-c">// eg 登陆我校图书馆获取图书信息</span></span>
+<span class="pl-s2"><span class="pl-vo">$username</span> <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">'</span>你的用户名<span class="pl-pds">'</span></span>;</span>
+<span class="pl-s2"><span class="pl-vo">$password</span> <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">'</span>你的密码<span class="pl-pds">'</span></span>;</span>
+<span class="pl-s2"><span class="pl-vo">$url</span> <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">'</span>http://www.lib.dlut.edu.cn/<span class="pl-pds">'</span></span>;</span>
+<span class="pl-s2"><span class="pl-vo">$sp</span><span class="pl-k">-&gt;</span> login(<span class="pl-vo">$url</span>,<span class="pl-vo">$username</span>,<span class="pl-vo">$password</span>) <span class="pl-k">or</span> <span class="pl-k">die</span>(<span class="pl-s1"><span class="pl-pds">"</span>Fail in login.<span class="pl-pds">"</span></span>);</span>
+<span class="pl-s2"><span class="pl-vo">$sp</span><span class="pl-k">-&gt;</span> fetch(<span class="pl-s1"><span class="pl-pds">'</span>http://opac.lib.dlut.edu.cn/reader/book_lst.php<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s2"><span class="pl-c">// 提取当前借阅信息到关联数组</span></span>
+<span class="pl-s2"><span class="pl-vo">$books</span> <span class="pl-k">=</span> <span class="pl-vo">$sp</span><span class="pl-k">-&gt;</span> fetch_table(<span class="pl-s1"><span class="pl-pds">'</span>[class=table_line]<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s2"><span class="pl-s3">header</span>(<span class="pl-s1"><span class="pl-pds">"</span>Content-type: text/html; charset=utf-8<span class="pl-pds">"</span></span>);</span>
+<span class="pl-s2"><span class="pl-s3">print_r</span> (<span class="pl-vo">$books</span>);</span>
+<span class="pl-s2"><span class="pl-c">// 将信息转为字符串输出</span></span>
+<span class="pl-s2"><span class="pl-vo">$info</span> <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>;</span>
+<span class="pl-s2"><span class="pl-k">foreach</span>(<span class="pl-vo">$books</span> <span class="pl-k">as</span> <span class="pl-vo">$key</span> <span class="pl-k">=&gt;</span> <span class="pl-vo">$book</span>){</span>
+<span class="pl-s2">    <span class="pl-c">// 如果图书超期加上超期前缀</span></span>
+<span class="pl-s2">    <span class="pl-vo">$deadline</span> <span class="pl-k">=</span> <span class="pl-s3">date_create</span>(<span class="pl-vo">$book</span>[<span class="pl-s1"><span class="pl-pds">'</span>应还日期<span class="pl-pds">'</span></span>]); </span>
+<span class="pl-s2">    <span class="pl-vo">$now</span><span class="pl-k">=</span> <span class="pl-s3">date_create</span>();</span>
+<span class="pl-s2">    <span class="pl-k">if</span>(<span class="pl-vo">$deadline</span><span class="pl-k">&gt;</span><span class="pl-vo">$now</span>){</span>
+<span class="pl-s2">        <span class="pl-vo">$info</span> <span class="pl-k">.=</span> <span class="pl-s1"><span class="pl-pds">"</span>(超期)<span class="pl-pds">"</span></span>;</span>
+<span class="pl-s2">    }</span>
+<span class="pl-s2">    <span class="pl-vo">$book_name</span> <span class="pl-k">=</span> <span class="pl-vo">$book</span>[<span class="pl-s1"><span class="pl-pds">'</span>题名/责任者<span class="pl-pds">'</span></span>];</span>
+<span class="pl-s2">    <span class="pl-c">// 追加信息</span></span>
+<span class="pl-s2">    <span class="pl-vo">$info</span> <span class="pl-k">.=</span> <span class="pl-vo">$book_name</span><span class="pl-k">.</span><span class="pl-s1"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>;</span>
+<span class="pl-s2">}</span>
+<span class="pl-s2"><span class="pl-s3">echo</span>  <span class="pl-s1"><span class="pl-pds">"</span>图书信息：<span class="pl-cce">\n</span><span class="pl-pds">"</span></span><span class="pl-k">.</span><span class="pl-vo">$info</span>;</span></pre></div>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/baidut/php_web_spider/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/baidut/php_web_spider/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/baidut/php_web_spider"></a> is maintained by <a href="https://github.com/baidut">baidut</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
