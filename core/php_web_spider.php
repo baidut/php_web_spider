@@ -11,7 +11,7 @@ Feature:
 -fetch web pages 网页抓取
 -get data 数据提取
 \*======================================================================*/
-class spider{
+class Spider{
 
     private $ch;        // cURL handle
     private $error;     // error messages sent here
@@ -208,8 +208,60 @@ class spider{
 		//print_r($data);
 		return $data;
     }
-
+/*======================================================================*\
+    Purpose:    
+    初始化先分析ul结构，提取出时间字段的位置和链接的位置后快速处理
+    转为数组结构
+\*======================================================================*/
+    function fetch_news($_url=""){ 
+        if($_url)$this-> fetch($_url);
+        $html = str_get_html($this-> html);
+        $body = $html->find('body',0);
+        // 初始化 
+        // 智能分析内容所在位置
+        define('DATE_PATTEN',"/^d{4}[-](0?[1-9]|1[012])[-](0?[1-9]|[12][0-9]|3[01])(s+(0?[0-9]|1[0-9]|2[0-3]):(0?[0-9]|[1-5][0-9]):(0?[0-9]|[1-5][0-9]))?$/");
+        $i_link = $i_date = '';
+        $lis=array();
+        foreach( $body->find('ul') as $key => $ul){
+            $li = $ul->find('li',1); // 取一条分析即可 取第二条比较合适
+            // echo $li->plaintext.'----------------------';
+            $find_link = $find_date = false;
+            foreach ($li->children() as $key => $element) {
+                switch($element->tag){
+                case 'a': 
+                    $i_link = $key; 
+                    $find_link = true;
+                    break;
+                case 'p': 
+                case 'span':
+                    if(1/*preg_match(DATE_PATTEN,trim($element->plaintext))*/){
+                        $i_date = $key;
+                        $find_date = true;
+                    }
+                    break;
+                default:break;
+                }
+            }
+            if($find_link&&$find_date){
+                $lis = $ul->find('li');
+                //print_r($lis);
+                break;
+            }
+        }
+        if(!$find_link) {
+            $this-> error = "Failed to locate the informatin";
+            return false;
+        }
+        // li to array
+        foreach( $lis as $key => $val) {
+            $data[$key]['link'] = $val->children($i_link)->outertext;
+            // $data[$key]['title'] = $val->children($i_link)->plaintext;
+            $data[$key]['date'] = $val->children($i_date)->plaintext;
+        }
+        return $data;
+    }
 	// to be added
+
 }
 
 ?>
