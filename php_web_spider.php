@@ -18,7 +18,6 @@ class spider{
     private $html;     	// carry last fetched html page
 
     function __construct() { 
-        require_once(PARSER_FILE);
         if(!extension_loaded('curl'))
             exit('Fatal error:The system does not extend php_curl.dll.');
         $this-> ch = curl_init();
@@ -32,7 +31,7 @@ class spider{
 \*======================================================================*/
     function reset(){
         curl_setopt($this-> ch, CURLOPT_USERAGENT,     "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; .NET4.0E; .NET4.0C; InfoPath.3; rv:11.0) like Gecko"); //"kind spider"
-        curl_setopt($this-> ch, CURLOPT_COOKIEJAR,      COOKIE_FILE);
+        curl_setopt($this-> ch, CURLOPT_COOKIEJAR,      "./cookie.txt");
         curl_setopt($this-> ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($this-> ch, CURLOPT_TIMEOUT,        120);
     }
@@ -43,7 +42,7 @@ class spider{
 \*======================================================================*/
     function fetch($url){
         curl_setopt($this-> ch,CURLOPT_URL,             $url);
-        curl_setopt($this-> ch,CURLOPT_COOKIE,          COOKIE_FILE); 
+        curl_setopt($this-> ch,CURLOPT_COOKIE,          "./cookie.txt"); 
         curl_setopt($this-> ch,CURLOPT_FOLLOWLOCATION,  true);
         return $this-> html = curl_exec($this-> ch);
     }
@@ -63,6 +62,7 @@ class spider{
         // 返回跳转后的页面 如果只提交表单，则返回1表示成功
         return $this-> html = curl_exec($this-> ch);
     }
+
 /*======================================================================*\
     Purpose:    login
     Input:      $_url       
@@ -146,6 +146,32 @@ class spider{
             // echo $this-> fetch($action);
             return $this-> post($_url,$fields);
         }
+    }
+/*======================================================================*\
+    Output:     the title of the web page
+\*======================================================================*/
+    function fetch_title($_url=""){ 
+        if($_url&&$this-> fetch($_url)){
+            $html = str_get_html($this-> html);
+            return $html->find('title',0)->plaintext;
+        }
+        return false;
+    }
+/*======================================================================*\
+    Output:     basic information of the web page
+\*======================================================================*/
+    function fetch_info($_url=""){ 
+        if($_url&&$this-> fetch($_url)){
+            $html = str_get_html($this-> html);
+            $header = $html->find('head',0);
+            $info['title'] = $header ->find('title',0)->plaintext;
+            if( $keywords = $header ->find('meta[name=keywords]',0) )
+                $info['keywords'] = $keywords->content;
+            if( $description = $header ->find('meta[name=description]',0))
+                $info['description'] = $description ->content;
+            return $info;
+        }
+        return false;
     }
 /*======================================================================*\
     Purpose:    屏蔽网页分析工具实现，提供格式化的表格数据
