@@ -11,6 +11,8 @@ Feature:
 -fetch web pages 网页抓取
 -get data 数据提取
 \*======================================================================*/
+define('DATE_PATTEN',"/^d{4}[-](0?[1-9]|1[012])[-](0?[1-9]|[12][0-9]|3[01])(s+(0?[0-9]|1[0-9]|2[0-3]):(0?[0-9]|[1-5][0-9]):(0?[0-9]|[1-5][0-9]))?$/");
+
 class Spider{
 
     private $ch;        // cURL handle
@@ -220,18 +222,23 @@ class Spider{
         $body = $html->find('body',0);
         // 初始化 
         // 智能分析内容所在位置
-        define('DATE_PATTEN',"/^d{4}[-](0?[1-9]|1[012])[-](0?[1-9]|[12][0-9]|3[01])(s+(0?[0-9]|1[0-9]|2[0-3]):(0?[0-9]|[1-5][0-9]):(0?[0-9]|[1-5][0-9]))?$/");
         $i_link = $i_date = '';
         $lis=array();
         foreach( $body->find('ul') as $key => $ul){
             $li = $ul->find('li',1); // 取一条分析即可 取第二条比较合适
-            // echo $li->plaintext.'----------------------';
-            $find_link = $find_date = false;
+            // echo $li->plaintext.'----------------------'; // 查看检索到的列表的第二项
+            // 日期有可能包含在链接里面 目前的方法不是很通用 适应性差
+            // 目前这种情况的处理是直接返回第一个元素作为日期 很有问题
+            $find_link = $find_date = $date_in_link = false;
             foreach ($li->children() as $key => $element) {
                 switch($element->tag){
                 case 'a': 
                     $i_link = $key; 
                     $find_link = true;
+                    if($element->find('span')){
+                        $date_in_link = true;
+                        $find_date = true;
+                    }
                     break;
                 case 'p': 
                 case 'span':
@@ -255,9 +262,18 @@ class Spider{
         }
         // li to array
         foreach( $lis as $key => $val) {
-            $data[$key]['link'] = $val->children($i_link)->outertext;
             // $data[$key]['title'] = $val->children($i_link)->plaintext;
-            $data[$key]['date'] = $val->children($i_date)->plaintext;
+            if(trim($val->plaintext)!=''){ // 有的网页存在<li><br/></li>
+                if($date_in_link){
+                    $data[$key]['link'] = $val->children($i_link)->outertext;
+                    $data[$key]['date'] = $val->children($i_link)->children(0)->plaintext;
+                }
+                else {
+                    $data[$key]['date'] = $val->children($i_date)->plaintext;
+                    $data[$key]['link'] = $val->children($i_link)->outertext;
+                } 
+            }
+
         }
         return $data;
     }

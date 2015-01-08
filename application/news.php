@@ -24,6 +24,8 @@
 // 分页 显示更多
 // 自动填入过滤常用词 新闻 通知 学术讲座
 
+
+// 列表转select
 // <form method="post" action="demoform.asp">
 //       <fieldset data-role="fieldcontain">
 //         <label for="day">选择天</label>
@@ -49,7 +51,12 @@ require_once(SPIDER_PATH.'simple_html_dom.php');
 // 新闻抓取
 $sp = new Spider;
 $url = 'http://www.ece.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=503';
+
+// $tmp = $sp-> fetch_news('http://www.phbs.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=419');
+// print_r($tmp);exit(0);
+
 $news['信工'] = $sp-> fetch_news($url);
+$news['汇丰商'] = $sp-> fetch_news('http://www.phbs.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=419');
 // print_r($news);exit(0);
 
 // 
@@ -65,6 +72,9 @@ $page = new ui_JMPage('南燕新闻',$list);
 $page->header->appendText('<a href="#" data-role="button" data-icon="home">首页</a>');
 $page->header->appendText('<a href="#" data-role="button" data-icon="grid" class="ui-btn-right">选项</a>');
 $ui = new ui_jQueryMobile($page);
+
+
+// TODO 添加配置页面
 
 echo $ui;
 
