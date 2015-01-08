@@ -17,11 +17,12 @@ class Spider{
     private $error;     // error messages sent here
     private $html;     	// carry last fetched html page
 
-    function __construct() { 
+    function __construct($url='') { 
         if(!extension_loaded('curl'))
             exit('Fatal error:The system does not extend php_curl.dll.');
         $this-> ch = curl_init();
         $this-> reset();
+        if($url)$this->fetch($url);
     }
     function __destruct() { 
         curl_close($this-> ch);
@@ -264,4 +265,24 @@ class Spider{
 
 }
 
+
+class NewsSpider extends Spider {
+    // 新闻和抓取配置存储到数据库中
+    // 数据库表 spider
+    // news link date abstract read
+    private $p_url;
+    private $p_link;
+    private $p_date;
+    function __construct($url){
+        // 如果数据库中可以查到对应url的配置，则载入，否则新建数据并载入
+
+        parent::__construct($url);
+    }
+    function getLatest($num,$fromTime) {// 获取从$fromTime起最近的$num条信息
+
+    }
+    function getUnread($num,$fromTime){ // 获取没有读的消息
+
+    }
+}
 ?>
