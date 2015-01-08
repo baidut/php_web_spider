@@ -5,7 +5,7 @@
 // http://localhost/github/php_web_spider/application/reader.php?url=http://www.phbs.pku.edu.cn/content-419-2333-1.html
 // $for = $_GET['for'];
 
-$url = $_GET['url'];
+$url = urldecode($_GET['url']);
 
 header("Content-type:text/html;charset=utf-8");
 

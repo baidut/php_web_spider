@@ -266,6 +266,7 @@ class Spider{
             if(trim($val->plaintext)!=''){ // 有的网页存在<li><br/></li>
                 $href = $val->children($i_link)->href;
                 $title = $val->children($i_link)->plaintext;
+                $enc_href = urlencode($href);
                 if($date_in_link){
                     $data[$key]['raw_link'] = $val->children($i_link)->outertext;
                     $data[$key]['date'] = $val->children($i_link)->children(0)->plaintext;
@@ -274,7 +275,7 @@ class Spider{
                     $data[$key]['date'] = $val->children($i_date)->plaintext;
                     $data[$key]['raw_link'] = $val->children($i_link)->outertext;
                 } 
-                $data[$key]['link'] = "<a href='reader.php?url=$href'>$title</a><a href='$href'>访问原网页</a>";
+                $data[$key]['link'] = "<a href='reader.php?url=$enc_href'>$title</a><a href='$href'>访问原网页</a>";
             }
         }
         return $data;
