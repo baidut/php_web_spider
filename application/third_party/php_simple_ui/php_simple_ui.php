@@ -67,14 +67,24 @@ class ui_Dom{
 	function text($t){$this->innertext = $t;return $this;}
 	function html($t){}
 	function val($v){$this->attr['value']=$v;return $this;}
-	function attr($name,$value){
-		$this->attr[$name]=$value;
-		return $this;
+	function attr($name,$value=''){
+		if($value='')return $this->attr[$name];
+		else {
+			$this->attr[$name]=$value;
+			return $this; // 属性设置支持链式操作
+		}
 	}
 	function __get($name) { return $this->attr[$name]; }
     function __set($name, $value) { $this->attr[$name] = $value; }
 
     function appendText($text) { $this->innertext .=$text; }
+
+    // ui相关
+    // 添加指向的标签
+    function label($text){
+    	$this->appendText('<label for="'.$this->attr('name').'">'.$text.'</label>');
+    	return $this;
+    }
 }
 
 // jQuery Mobile UI 建模
@@ -188,6 +198,90 @@ class ui_JMListView extends ui_Dom{
 	}
 }
 
+    // < method="post" action="demoform.asp">
+    //   <div data-role="fieldcontain">
+    //     <label for="fullname">全名：</label>
+    //     <input type="text" name="fullname" id="fullname">       
+    //     <label for="bday">生日：</label>
+    //     <input type="date" name="bday" id="bday">
+    //     <label for="email">电邮：</label>
+    //     <input type="email" name="email" id="email" placeholder="您的邮箱地址..">
+    //   </div>
+    //   <input type="submit" data-inline="true" value="提交">
+    // </form>
+class ui_JMForm extends ui_Dom{
+	function __construct($action='#',$method='post') {
+        parent::__construct('form');
+        $this->attr('method',$method);
+        $this->attr('action',$action);
+    }
+    // labels and doms
+    // 与CI的表单辅助函数不同的是，这里不需要了解表单的结构，只需要明确需要什么数据即可
+    // 视图方面默认提供最优的，如果需要调整则通过链式修改相应属性
+    function appendSelect($name,$data,$multiple=false){
+    	$select = new ui_Dom('select');
+    	if($multiple){
+    		$select->attr('multiple','multiple');
+    		$select->appendText('<option>你可以选择多个</option>');
+    	}
+    	foreach ($data as $key => $value) {
+    		// 对于不可能继续追加子元素的情况采用appendText比较高效简单
+    		$select->appendText("<option value='$value'>$key</option>");
+    	}
+    	$this->append($select);
+    	return $select; // 继续对select进行设置
+    }
+}
+
+// 与ui呈现有关的参数和逻辑相关的参数应当分开配置 label的添加方式
+function ui_JMSelect($name,$data,$multiple=false){
+	$select = new ui_Dom('select');
+	if($multiple){
+		$select->attr('multiple','multiple');
+		$select->appendText('<option>你可以选择多个</option>');
+	}
+	if(!$native_menu)$select->attr('data-native-menu','false');
+	foreach ($data as $key => $value) {
+		// 对于不可能继续追加子元素的情况采用appendText比较高效简单
+		$select->appendText("<option value='$value'>$key</option>");
+	}
+	return $select;
+}
+
+// append( label(''),select('') );
+
+// 列表转select
+// <form method="post" action="demoform.asp">
+//       <fieldset data-role="fieldcontain">
+//         <label for="day">选择天</label>
+//         <select name="day" id="day">
+//          <option value="mon">星期一</option>
+//          <option value="tue">星期二</option>
+//          <option value="wed">星期三</option>
+//          <option value="thu">星期四</option>
+//          <option value="fri">星期五</option>
+//          <option value="sat">星期六</option>
+//          <option value="sun">星期日</option>
+//         </select>
+//       </fieldset>
+//       <input type="submit" data-inline="true" value="提交">
+//     </form>
 
 
+// <form method="post" action="demoform.asp">
+//    <fieldset>
+//    <label for="day">您可以选择多天：</label>
+//    <select name="day" id="day" multiple="multiple" data-native-menu="false">
+// 	<option>天</option>
+// 	<option value="mon">星期一</option>
+// 	<option value="tue">星期二</option>
+// 	<option value="wed">星期三</option>
+// 	<option value="thu">星期四</option>
+// 	<option value="fri">星期五</option>
+// 	<option value="sat">星期六</option>
+// 	<option value="sun">星期日</option>
+//    </select>
+//    </fieldset>
+//    <input type="submit" data-inline="true" value="提交">
+//   </form>
 

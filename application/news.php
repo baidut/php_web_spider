@@ -25,22 +25,6 @@
 // 自动填入过滤常用词 新闻 通知 学术讲座
 
 
-// 列表转select
-// <form method="post" action="demoform.asp">
-//       <fieldset data-role="fieldcontain">
-//         <label for="day">选择天</label>
-//         <select name="day" id="day">
-//          <option value="mon">星期一</option>
-//          <option value="tue">星期二</option>
-//          <option value="wed">星期三</option>
-//          <option value="thu">星期四</option>
-//          <option value="fri">星期五</option>
-//          <option value="sat">星期六</option>
-//          <option value="sun">星期日</option>
-//         </select>
-//       </fieldset>
-//       <input type="submit" data-inline="true" value="提交">
-//     </form>
 
 header("Content-type:text/html;charset=utf-8");
 
@@ -58,16 +42,36 @@ $url = 'http://www.ece.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=503'
 $news['信工'] = $sp-> fetch_news($url);
 $news['汇丰商'] = $sp-> fetch_news('http://www.phbs.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=419');
 // print_r($news);exit(0);
+// 建议采用AJAX技术获取数据，或者只进行数据过滤 重新接收页面开销太大。AJAX为JS代码，处理成php端。
 
-// 
-require_once('third_party/php_simple_ui/php_simple_ui.php');
 // $ui = new php_simple_ui(UI_JQueryMobile);
 // $echo $ui;
-
+$opt_schools = array(
+	'信工'=>'SECE',
+	'化生'=>'SCBB',
+	'环能'=>'SEE',
+	'城规'=>'SUPD',
+	'新材料'=>'SAM',
+	'汇丰'=>'PHBS',
+	'法学院'=>'STL',
+	'人文社科'=>'SHSS'
+	);
+$opt_date = array(
+	'一周内'=>'week',
+	'一月内'=>'month',
+	);
+// 数据和视图分离 -----
+require_once('third_party/php_simple_ui/php_simple_ui.php');
 // 一级一级构建方式
+$form = new ui_JMForm();
+$form->appendSelect('schools',$opt_schools,true)->label('选择1个或多个学院')->attr('data-native-menu','false'); // 视图加强，只是对jQueryMobile有效的样式属性的设置
+// 逻辑相关的放在构造中，视图加强通过链式做不允许连续append
+$form->appendSelect();
+
 $list = new ui_JMListView($news);
 $list->addFilter('搜索活动');
-$page = new ui_JMPage('南燕新闻',$list);
+$page = new ui_JMPage('南燕新闻',$form);
+$page->appendContent($list);
 // $page->content->appendText();
 $page->header->appendText('<a href="#" data-role="button" data-icon="home">首页</a>');
 $page->header->appendText('<a href="#" data-role="button" data-icon="grid" class="ui-btn-right">选项</a>');
@@ -75,6 +79,7 @@ $ui = new ui_jQueryMobile($page);
 
 
 // TODO 添加配置页面
+// $page = new ui_JMPage();
 
 echo $ui;
 
