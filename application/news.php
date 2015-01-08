@@ -39,13 +39,22 @@ $url = 'http://www.ece.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=503'
 // $tmp = $sp-> fetch_news('http://www.phbs.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=419');
 // print_r($tmp);exit(0);
 
-$news['信工'] = $sp-> fetch_news($url);
+$news['信工'] = $sp-> fetch_news($url); // 提供特殊形式链接
 $news['汇丰商'] = $sp-> fetch_news('http://www.phbs.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=419');
+
+
+// 添加拆分按钮
+foreach ($news as $key => $value) {
+	# code...
+}
+
 // print_r($news);exit(0);
-// 建议采用AJAX技术获取数据，或者只进行数据过滤 重新接收页面开销太大。AJAX为JS代码，处理成php端。
+// 采用AJAX技术获取数据，或者只进行数据过滤 重新接收页面开销太大。AJAX为JS代码，处理成php端。
+// 不需要采用AJAX，配置好后，需求一般不变更。记录到主页即可，get方式配置，或post+cookie进行配置
 
 // $ui = new php_simple_ui(UI_JQueryMobile);
 // $echo $ui;
+// 配置项
 $opt_schools = array(
 	'信工'=>'SECE',
 	'化生'=>'SCBB',
@@ -60,13 +69,15 @@ $opt_date = array(
 	'一周内'=>'week',
 	'一月内'=>'month',
 	);
+// 分页模式-每页显示个数，显示更多（AJAX）
+// pageView传入提取内容的相关启发信息，得到页面的核心内容，然后呈现，并提供返回按钮 核心内容可能为图片
+
 // 数据和视图分离 -----
 require_once('third_party/php_simple_ui/php_simple_ui.php');
 // 一级一级构建方式
 $form = new ui_JMForm();
 $form->appendSelect('schools',$opt_schools,true)->label('选择1个或多个学院')->attr('data-native-menu','false'); // 视图加强，只是对jQueryMobile有效的样式属性的设置
 // 逻辑相关的放在构造中，视图加强通过链式做不允许连续append
-$form->appendSelect();
 
 $list = new ui_JMListView($news);
 $list->addFilter('搜索活动');

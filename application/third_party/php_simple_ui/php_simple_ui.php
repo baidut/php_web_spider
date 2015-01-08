@@ -68,11 +68,11 @@ class ui_Dom{
 	function html($t){}
 	function val($v){$this->attr['value']=$v;return $this;}
 	function attr($name,$value=''){
-		if($value='')return $this->attr[$name];
-		else {
+		if($value){
 			$this->attr[$name]=$value;
 			return $this; // 属性设置支持链式操作
 		}
+		else return $this->attr[$name]; // isset($this->attr[$name])
 	}
 	function __get($name) { return $this->attr[$name]; }
     function __set($name, $value) { $this->attr[$name] = $value; }
@@ -149,7 +149,7 @@ class ui_JMPage extends ui_Dom{
         	$this->append($this->header);
         }
         $this->content = new ui_Dom('div');
-        $this->content->attr('data-role','content')->text("<h1>$title</h1>");
+        $this->content->attr('data-role','content');
         $this->append($this->content);
 
         if($data)$this->appendContent($data);
@@ -160,7 +160,7 @@ class ui_JMPage extends ui_Dom{
 }
 
 // 自动追加计数气泡
-
+// 支持拆分按钮，也可在新闻页面提供原网址链接
 class ui_JMListView extends ui_Dom{
 	function __construct($data,$order=false,$data_inset=false) {
         parent::__construct(($order)?'ol':'ul');
@@ -181,7 +181,7 @@ class ui_JMListView extends ui_Dom{
 		// 自动追加计数气泡
 		if($title)$this->appendText('<li data-role="list-divider">'.$title.'<span class="ui-li-count">'.count($data).'</span></li>');
 		foreach ($data as $key => $value) { // value可以是一个链接
-			if(is_array($value))$this->appendText('<li>'.$value['link'].'</li>');
+			if(is_array($value))$this->appendText('<li>'.$value['link'].'</li>'); 
 			else $this->appendText('<li>'.$value.'</li>');
 		}
 	}
@@ -230,6 +230,10 @@ class ui_JMForm extends ui_Dom{
     	}
     	$this->append($select);
     	return $select; // 继续对select进行设置
+    }
+    function ajax(){
+    	$this->attr('onsubmit','javascript:return ajax();');
+    	// 数据改为通过ajax方式提交
     }
 }
 

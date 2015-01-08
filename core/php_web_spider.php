@@ -164,7 +164,7 @@ class Spider{
     Output:     basic information of the web page
 \*======================================================================*/
     function fetch_info($_url=""){ 
-        if($_url&&$this-> fetch($_url)){
+        if( (!$_url) || $this-> fetch($_url)){
             $html = str_get_html($this-> html);
             $header = $html->find('head',0);
             $info['title'] = $header ->find('title',0)->plaintext;
@@ -264,18 +264,31 @@ class Spider{
         foreach( $lis as $key => $val) {
             // $data[$key]['title'] = $val->children($i_link)->plaintext;
             if(trim($val->plaintext)!=''){ // 有的网页存在<li><br/></li>
+                $href = $val->children($i_link)->href;
+                $title = $val->children($i_link)->plaintext;
                 if($date_in_link){
-                    $data[$key]['link'] = $val->children($i_link)->outertext;
+                    $data[$key]['raw_link'] = $val->children($i_link)->outertext;
                     $data[$key]['date'] = $val->children($i_link)->children(0)->plaintext;
                 }
                 else {
                     $data[$key]['date'] = $val->children($i_date)->plaintext;
-                    $data[$key]['link'] = $val->children($i_link)->outertext;
+                    $data[$key]['raw_link'] = $val->children($i_link)->outertext;
                 } 
+                $data[$key]['link'] = "<a href='reader.php?url=$href'>$title</a><a href='$href'>访问原网页</a>";
             }
-
         }
         return $data;
+    }
+/*======================================================================*\
+    Purpose:    
+    获取页面核心内容
+\*======================================================================*/
+    function fetch_main_content($_url='',$_info='div[class=article]'){
+        if($_url)$this->fetch($_url);
+        $html = str_get_html($this-> html);
+        $body = $html->find('body',0);
+        $main = $body->find($_info,0);
+        return $main;
     }
 	// to be added
 
