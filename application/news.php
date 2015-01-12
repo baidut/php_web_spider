@@ -24,6 +24,8 @@
 // 分页 显示更多
 // 自动填入过滤常用词 新闻 通知 学术讲座
 
+// Fatal error: Call to a member function find() on a non-object in D:\Program Files\xampp\htdocs\GitHub\php_web_spider\core\php_web_spider.php on line 222
+
 
 
 header("Content-type:text/html;charset=utf-8");
@@ -39,14 +41,23 @@ $url = 'http://www.ece.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=503'
 // $tmp = $sp-> fetch_news('http://www.phbs.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=419');
 // print_r($tmp);exit(0);
 
-$news['信工'] = $sp-> fetch_news($url); // 提供特殊形式链接
-$news['汇丰商'] = $sp-> fetch_news('http://www.phbs.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=419');
+// 网址信息数据 建议从数据库中获取
 
+$news['信息工程学院'] = $sp-> fetch_news($url); // 提供特殊形式链接
+$news['汇丰商学院'] = $sp-> fetch_news('http://www.phbs.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=419');
+$news['化学生物学与生物技术学院'] = $sp-> fetch_news('http://www.scbb.pkusz.edu.cn/index.php?m=content&c=index&a=lists&catid=862');
+// $news['环境与能源学院'] = $sp-> fetch_news('http://see.pkusz.edu.cn/news_cn.aspx');
+// $news['城市规划与设计学院'] = $sp-> fetch_news('http://see.pkusz.edu.cn/news_cn.aspx');
+// $news['城市规划与设计学院'] = $sp-> fetch_news('http://sam.pkusz.edu.cn/index.php?m=content&c=index&a=lists&catid=395');
+
+// 讲座信息
+// $lecture['新材料学院'] = $sp-> fetch_news('http://sam.pkusz.edu.cn/index.php?m=content&c=index&a=lists&catid=809');
+// Undefined variable: find_link in D:\Program Files\xampp\htdocs\GitHub\php_web_spider\core\php_web_spider.php on line 259
 
 // 添加拆分按钮
-foreach ($news as $key => $value) {
-	# code...
-}
+// foreach ($news as $key => $value) {
+// 	# code...
+// }
 
 // print_r($news);exit(0);
 // 采用AJAX技术获取数据，或者只进行数据过滤 重新接收页面开销太大。AJAX为JS代码，处理成php端。
@@ -55,6 +66,8 @@ foreach ($news as $key => $value) {
 // $ui = new php_simple_ui(UI_JQueryMobile);
 // $echo $ui;
 // 配置项
+// 新闻，学术讲座，活动
+// 配置页面，提供学院选择配置，内容配置，日期配置
 $opt_schools = array(
 	'信工'=>'SECE',
 	'化生'=>'SCBB',
@@ -65,12 +78,25 @@ $opt_schools = array(
 	'法学院'=>'STL',
 	'人文社科'=>'SHSS'
 	);
+$opt_content = array(
+	'新闻'=>'NEWS',
+	'活动'=>'ACT',
+	'讲座'=>'LECTURE',
+
+	);
 $opt_date = array(
 	'一周内'=>'week',
 	'一月内'=>'month',
 	);
 // 分页模式-每页显示个数，显示更多（AJAX）
 // pageView传入提取内容的相关启发信息，得到页面的核心内容，然后呈现，并提供返回按钮 核心内容可能为图片
+
+
+// 根据get获取配置信息
+
+
+
+
 
 // 数据和视图分离 -----
 require_once('third_party/php_simple_ui/php_simple_ui.php');
@@ -82,6 +108,7 @@ $form->appendSelect('schools',$opt_schools,true)->label('选择1个或多个学�
 $list = new ui_JMListView($news);
 $list->addFilter('搜索活动');
 $page = new ui_JMPage('南燕新闻',$form);
+$page ->title('南燕助手');
 $page->appendContent($list);
 // $page->content->appendText();
 $page->header->appendText('<a href="#" data-role="button" data-icon="home">首页</a>');

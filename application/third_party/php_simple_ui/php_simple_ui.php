@@ -25,16 +25,25 @@ echo $ui;
 // <html><head><script src="http://code.jquery.com/jquery-1.8.3.min.js"></script><link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css"><script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></head><body></body></html>
 */
 
+// Chinese
+// define('TEXT_BACK_TO_TOP','回顶部');
+// define('TEXT_SHARE','分享');
+// define('TEXT_HOME','主页');
 
+// English
+define('TEXT_BACK_TO_TOP','BACK TO TOP');
+define('TEXT_SHARE','SHARE');
+define('TEXT_HOME','HOME');
+define('TEXT_SETTINGS','SETTINGS');
 
 class ui_Dom{
     public $attr = array(); // 'value'=>3 关联数组形式
     public $children = array();
-    private $ele = null;
+    private $tag = null;
     private $innertext = '';  // 是否需要识别html标签的能力？可以解析出内容——html_simple_dom 选择性分析比较高效
 
-    function __construct($ele='div',$content='') {
-        $this->ele = $ele;
+    function __construct($tag='div',$content='') {
+        $this->tag = $tag;
         if($content!='')$this->innertext = $content;
     }
 
@@ -45,7 +54,7 @@ class ui_Dom{
     }
 
     function __toString(){
-    	$ret= '<'.$this->ele;
+    	$ret= '<'.$this->tag;
 		foreach ($this->attr as $key => $value) {
 			$ret.=' '.$key.'="'.$value.'"';
 		}
@@ -53,10 +62,12 @@ class ui_Dom{
 		foreach($this->children as $child){
 			$ret.=$child;
 		}
-		return $ret.$this->innertext.'</'.$this->ele.'>';
+		return $ret.$this->innertext.'</'.$this->tag.'>';
 	}
 
-	function append($node,$content=''){
+	function append($node,$content=''){ // TODO 这里的$content改为属性集合
+        // new Dom('div',$children,$attrs) new Dom('div',$innerHTML,$attrs)
+        // append(new Dom('div','this is a div'), array('color'=>'yellow'));
 		$ret = is_string($node)? (new ui_Dom($node,$content) ): $node;
 		array_push($this->children,$ret); 
 		return $ret;
@@ -64,7 +75,10 @@ class ui_Dom{
 	function prepend($node){$ret = new ui_Dom($node); array_unshift($this->children,$ret); return $ret;}
 	function after($node){}
 	function before($node){}
-	function text($t){$this->innertext = $t;return $this;}
+	function text($t){
+        // 不开放$this->innertext成员，用这个函数可以解析元素，然后插入
+        $this->innertext = $t;return $this;
+    }
 	function html($t){}
 	function val($v){$this->attr['value']=$v;return $this;}
 	function attr($name,$value=''){
@@ -72,13 +86,30 @@ class ui_Dom{
 			$this->attr[$name]=$value;
 			return $this; // 属性设置支持链式操作
 		}
-		else return $this->attr[$name]; // isset($this->attr[$name])
+		else return $this->attr[$name]; // isset($this->attr[$name]) // Undefined index: name
 	}
 	function __get($name) { return $this->attr[$name]; }
     function __set($name, $value) { $this->attr[$name] = $value; }
 
     function appendText($text) { $this->innertext .=$text; }
 
+    // jQuery 遍历 - 后代 不支持批量操作
+    // $("div").children().css({"color":"red","border":"2px solid red"}); 
+    function find($selector,$idx=null){ // lowercase
+        if($selector=='*'){
+            $found = $this->children;
+        }
+        else{
+            $found = array();
+            foreach ($this->children as $key => $child) {
+                if($child->tag == $selector)array_push($found,$child);
+            }
+        }
+        // TODO 添加解析innerHtml中搜索，innerHtml一般为不进行操作的元素，暂时不处理，可以在appendHTML的时候进行解析
+        if (is_null($idx)) return $found;
+        else if ($idx<0) $idx = count($found) + $idx;
+        return (isset($found[$idx])) ? $found[$idx] : null;
+    }
     // ui相关
     // 添加指向的标签
     function label($text){
@@ -137,22 +168,31 @@ class ui_JMPage extends ui_Dom{
 	public $content;
 	public $header;
 	public $footer;
-	function __construct($title='',$data) {
+	function __construct($id='',$data) { // $title直接作为id比较方便 首页 Home
         parent::__construct();
         $this->attr('data-role','page');
         // $this->content = new ui_Dom('div',ATTR,'data-role="content">'); 比较麻烦
         // $this->content = new ui_Dom('div',attr('data-role',"content")); 
-        if($title!=''){
-        	$this->id = $title;
-        	$this->header = new ui_Dom('div');
-        	$this->header->attr('data-role','header')->text("<h1>$title</h1>");
-        	$this->append($this->header);
+        $this->header = new ui_Dom('div');
+        $this->append($this->header);
+
+        if($id!=''){
+        	$this->id = $id;
+        	$this->header->attr('data-role','header')->append(new ui_Dom('h1',$id)); //text("<h1>$id</h1>");
+            // if($id==TEXT_HOME)
         }
         $this->content = new ui_Dom('div');
         $this->content->attr('data-role','content');
         $this->append($this->content);
 
+        $this->footer = new ui_Dom('div');
+        $this->footer->attr('data-role','footer')->text('<a href="#" data-role="button" data-icon="plus">'.TEXT_SHARE.'</a><a href="javascript:scroll(0,0)" data-role="button" data-icon="arrow-u">'.TEXT_BACK_TO_TOP.'</a>');
+        $this->append($this->footer);
+
         if($data)$this->appendContent($data);
+    }
+    function title($t){
+        $this->header->find('h1',0)->text($t); // 多个h1的情况？ 
     }
     function appendContent($node){
     	$this->content->append($node);

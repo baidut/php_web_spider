@@ -257,7 +257,7 @@ class Spider{
             }
         }
         if(!$find_link) {
-            $this-> error = "Failed to locate the informatin";
+            $this-> error = "Failed to locate the information";
             return false;
         }
         // li to array
