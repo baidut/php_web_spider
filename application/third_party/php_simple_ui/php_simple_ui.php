@@ -1,4 +1,8 @@
 <?php 
+
+// 目的：专注核心数据内容，不关心前端ui实现
+
+
 // localhost/GitHub/php_simple_ui/php_simple_ui.php
 // 方案1：输出jQuery语句在客户端创建
 // 方案2：服务器端生成ui，需要消耗计算资源，如果便捷性大于速度牺牲的话有意义，用简短的代码，整洁的结构控制ui输出
@@ -65,7 +69,7 @@ class ui_Dom{
 		return $ret.$this->innertext.'</'.$this->tag.'>';
 	}
 
-	function append($node,$content=''){ // TODO 这里的$content改为属性集合
+	function append($node,$content=''){ // TODO 这里的$content改为属性集合或属性
         // new Dom('div',$children,$attrs) new Dom('div',$innerHTML,$attrs)
         // append(new Dom('div','this is a div'), array('color'=>'yellow'));
 		$ret = is_string($node)? (new ui_Dom($node,$content) ): $node;
@@ -75,7 +79,8 @@ class ui_Dom{
 	function prepend($node){$ret = new ui_Dom($node); array_unshift($this->children,$ret); return $ret;}
 	function after($node){}
 	function before($node){}
-	function text($t){
+	function text($t=null){
+        if(is_null($t))return $this->innertext; 
         // 不开放$this->innertext成员，用这个函数可以解析元素，然后插入
         $this->innertext = $t;return $this;
     }
@@ -131,44 +136,75 @@ class ui_jQuery extends ui_Dom{
 }
 
 class ui_jQueryMobile extends ui_jQuery{
+    private $pages = array();
 
-	function __construct($page='') {
+	function __construct($pages=null) {
         parent::__construct();
         $script = new ui_Dom('script');
         $script->src='';
         $this->head->appendText('<link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css"><script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>');
 
-        if($page) $this->body->append($page);
+        if(!is_null($pages)){
+            if(is_array($pages)){
+                foreach($pages as $key => $page){
+                   $this->body->append($page)->attr('id',$key);
+                   array_push($this->pages,$page);
+                   // $this->appendPage($page)->appendContent(new ui_JMDom('navibar',));
+                }
+                // 多个页面时自动生成工具栏，每个页面都显示
+                $this->appendNavbar();
+            }
+            else $this->body->append($page);
+        }
     }
     function appendPage($title){
     	$page = new ui_JMPage($title);
     	$this->body->append($page);
     	return $this;
     }
+    function appendNavbar($data=null){
+    // 根据页面添加导航 页面的title作为导航名称，用户可以再配置图标
+        if(is_null($data)){
+            $nav = array();
+            foreach ($this->pages as $key => $page){
+                $title = $page->title();
+                $id = $page->id;
+                $nav[$title] = '#'.$id;
+            }
+            foreach($this->pages as $key=>$page){
+                $page->header->append(new ui_JMDom('navbar',$nav));
+            }
+        }
+    }
+}
+
+class ui_JMDom extends ui_Dom{
+    function __construct($role,$data) {
+        parent::__construct();
+        // 根据不同UI容器识别数据装入
+        $ap = null;
+        switch($role){
+            case 'navbar':
+                $ul = new ui_Dom('ul');
+                foreach ($data as $key => $value) {
+                    $ul->append(new ui_Dom('li'))->append(new ui_Dom('a',$key))->attr('href',$value);
+                    // <li><a href="#anylink">搜索</a></li>
+                }
+                $ap = $ul;
+                break;
+        }
+        $this->attr('data-role',$role);
+        $this->append($ap);
+    }
 }
 
 // <a href="#pagetwo" data-rel="dialog">转到页面二</a> 对话框形式打开页面
 
 class ui_JMPage extends ui_Dom{
-// 	<div data-role="page">
-
-//   <div data-role="header">
-//     <h1>欢迎访问我的主页</h1>
-//   </div>
-
-//   <div data-role="content">
-//     <p>我是一名移动开发者！</p>
-//   </div>
-
-//   <div data-role="footer">
-//     <h1>页脚文本</h1>
-//   </div>
-
-// </div>
 	public $content;
 	public $header;
 	public $footer;
-	function __construct($id='',$data) { // $title直接作为id比较方便 首页 Home
+	function __construct($id='',$content=null) { // $title直接作为id比较方便 首页 Home
         parent::__construct();
         $this->attr('data-role','page');
         // $this->content = new ui_Dom('div',ATTR,'data-role="content">'); 比较麻烦
@@ -189,9 +225,18 @@ class ui_JMPage extends ui_Dom{
         $this->footer->attr('data-role','footer')->text('<a href="#" data-role="button" data-icon="plus">'.TEXT_SHARE.'</a><a href="javascript:scroll(0,0)" data-role="button" data-icon="arrow-u">'.TEXT_BACK_TO_TOP.'</a>');
         $this->append($this->footer);
 
-        if($data)$this->appendContent($data);
+        if(!is_null($content)){
+           if(is_array($content)){
+                foreach($content as $c)
+                    $this->appendContent($c);
+            }
+            else{
+                $this->appendContent($content);
+            }
+        }
     }
-    function title($t){
+    function title($t=null){
+        if(is_null($t))return $this->header->find('h1',0)->text();
         $this->header->find('h1',0)->text($t); // 多个h1的情况？ 
     }
     function appendContent($node){

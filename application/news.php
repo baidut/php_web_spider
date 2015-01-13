@@ -45,7 +45,8 @@ $url = 'http://www.ece.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=503'
 
 $news['信息工程学院'] = $sp-> fetch_news($url); // 提供特殊形式链接
 $news['汇丰商学院'] = $sp-> fetch_news('http://www.phbs.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=419');
-$news['化学生物学与生物技术学院'] = $sp-> fetch_news('http://www.scbb.pkusz.edu.cn/index.php?m=content&c=index&a=lists&catid=862');
+// $news['化学生物学与生物技术学院'] = $sp-> fetch_news('http://www.scbb.pkusz.edu.cn/index.php?m=content&c=index&a=lists&catid=862');
+
 // $news['环境与能源学院'] = $sp-> fetch_news('http://see.pkusz.edu.cn/news_cn.aspx');
 // $news['城市规划与设计学院'] = $sp-> fetch_news('http://see.pkusz.edu.cn/news_cn.aspx');
 // $news['城市规划与设计学院'] = $sp-> fetch_news('http://sam.pkusz.edu.cn/index.php?m=content&c=index&a=lists&catid=395');
@@ -105,16 +106,27 @@ $form = new ui_JMForm();
 $form->appendSelect('schools',$opt_schools,true)->label('选择1个或多个学院')->attr('data-native-menu','false'); // 视图加强，只是对jQueryMobile有效的样式属性的设置
 // 逻辑相关的放在构造中，视图加强通过链式做不允许连续append
 
+
+// 可以添加多个页面，关联数组id直接生成id
+$pages['setting'] = new ui_JMPage('设置');
+$pages['login'] = new ui_JMPage('登陆');
+$pages['article'] = new ui_JMPage('文章');
+$ui = new ui_jQueryMobile($pages);
+echo $ui;
+
+exit(0);
+
+// 无需定义页面之间连接，直接自动生成导航栏、
+
 $list = new ui_JMListView($news);
 $list->addFilter('搜索活动');
-$page = new ui_JMPage('南燕新闻',$form);
-$page ->title('南燕助手');
-$page->appendContent($list);
+$page = new ui_JMPage('南燕新闻',array($form,$list));
+// $page->title('南燕助手');
+// $page->appendContent($list);
 // $page->content->appendText();
 $page->header->appendText('<a href="#" data-role="button" data-icon="home">首页</a>');
 $page->header->appendText('<a href="#" data-role="button" data-icon="grid" class="ui-btn-right">选项</a>');
 $ui = new ui_jQueryMobile($page);
-
 
 // TODO 添加配置页面
 // $page = new ui_JMPage();

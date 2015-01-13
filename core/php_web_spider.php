@@ -13,6 +13,10 @@ Feature:
 \*======================================================================*/
 define('DATE_PATTEN',"/^d{4}[-](0?[1-9]|1[012])[-](0?[1-9]|[12][0-9]|3[01])(s+(0?[0-9]|1[0-9]|2[0-3]):(0?[0-9]|[1-5][0-9]):(0?[0-9]|[1-5][0-9]))?$/");
 
+// 异常类型定义
+class CurlException extends Exception{} 
+class ParserException extends Exception{} 
+
 class Spider{
 
     private $ch;        // cURL handle
@@ -35,7 +39,10 @@ class Spider{
     function reset(){
         curl_setopt($this-> ch, CURLOPT_USERAGENT,     "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; .NET4.0E; .NET4.0C; InfoPath.3; rv:11.0) like Gecko"); //"kind spider"
         curl_setopt($this-> ch, CURLOPT_COOKIEJAR,      "./cookie.txt");
-        curl_setopt($this-> ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($this-> ch, CURLOPT_RETURNTRANSFER, 1); // 如果设置了这项则curl_exec会在成功时返回内容
+// mixed curl_exec ( resource ch )
+// Execute the given cURL session.
+// This function should be called after you initialize a cURL session and all the options for the session are set.
         curl_setopt($this-> ch, CURLOPT_TIMEOUT,        120);
     }
 /*======================================================================*\
@@ -47,7 +54,11 @@ class Spider{
         curl_setopt($this-> ch,CURLOPT_URL,             $url);
         curl_setopt($this-> ch,CURLOPT_COOKIE,          "./cookie.txt"); 
         curl_setopt($this-> ch,CURLOPT_FOLLOWLOCATION,  true);
-        return $this-> html = curl_exec($this-> ch);
+        $output = curl_exec($this-> ch); // 防止失败后覆盖掉上次结果
+
+        if($output)$this-> html = $output;
+        else throw new CurlException($this-> error = curl_error($this-> ch));
+        return $output;
     }
 /*======================================================================*\
     Purpose:    submit a form
@@ -216,69 +227,75 @@ class Spider{
     初始化先分析ul结构，提取出时间字段的位置和链接的位置后快速处理
     转为数组结构
 \*======================================================================*/
-    function fetch_news($_url=""){ 
-        if($_url)$this-> fetch($_url);
-        $html = str_get_html($this-> html);
-        $body = $html->find('body',0);
-        // 初始化 
-        // 智能分析内容所在位置
-        $i_link = $i_date = '';
-        $lis=array();
-        foreach( $body->find('ul') as $key => $ul){
-            $li = $ul->find('li',1); // 取一条分析即可 取第二条比较合适
-            // echo $li->plaintext.'----------------------'; // 查看检索到的列表的第二项
-            // 日期有可能包含在链接里面 目前的方法不是很通用 适应性差
-            // 目前这种情况的处理是直接返回第一个元素作为日期 很有问题
-            $find_link = $find_date = $date_in_link = false;
-            foreach ($li->children() as $key => $element) {
-                switch($element->tag){
-                case 'a': 
-                    $i_link = $key; 
-                    $find_link = true;
-                    if($element->find('span')){
-                        $date_in_link = true;
-                        $find_date = true;
+    function fetch_news($_url=null){ 
+        try{
+            if($_url) $this-> fetch($_url);// throw可以跨函数
+            $html = str_get_html($this->html);
+            $body = $html->find('body',0); 
+            // 初始化 
+            if(!$body)throw new ParserException("Fail to locate the html body.");// Call to a member function find() on a non-object
+            // 智能分析内容所在位置
+            $i_link = $i_date = '';
+            $lis=array();
+            foreach( $body->find('ul') as $key => $ul){
+                $li = $ul->find('li',1); // 取一条分析即可 取第二条比较合适
+                // echo $li->plaintext.'----------------------'; // 查看检索到的列表的第二项
+                // 日期有可能包含在链接里面 目前的方法不是很通用 适应性差
+                // 目前这种情况的处理是直接返回第一个元素作为日期 很有问题
+                $find_link = $find_date = $date_in_link = false;
+                foreach ($li->children() as $key => $element) {
+                    switch($element->tag){
+                    case 'a': 
+                        $i_link = $key; 
+                        $find_link = true;
+                        if($element->find('span')){
+                            $date_in_link = true;
+                            $find_date = true;
+                        }
+                        break;
+                    case 'p': 
+                    case 'span':
+                        if(1/*preg_match(DATE_PATTEN,trim($element->plaintext))*/){
+                            $i_date = $key;
+                            $find_date = true;
+                        }
+                        break;
+                    default:break;
                     }
+                }
+                if($find_link&&$find_date){
+                    $lis = $ul->find('li');
+                    //print_r($lis);
                     break;
-                case 'p': 
-                case 'span':
-                    if(1/*preg_match(DATE_PATTEN,trim($element->plaintext))*/){
-                        $i_date = $key;
-                        $find_date = true;
-                    }
-                    break;
-                default:break;
                 }
             }
-            if($find_link&&$find_date){
-                $lis = $ul->find('li');
-                //print_r($lis);
-                break;
-            }
-        }
-        if(!$find_link) {
-            $this-> error = "Failed to locate the information";
-            return false;
-        }
-        // li to array
-        foreach( $lis as $key => $val) {
-            // $data[$key]['title'] = $val->children($i_link)->plaintext;
-            if(trim($val->plaintext)!=''){ // 有的网页存在<li><br/></li>
-                $href = $val->children($i_link)->href;
-                $title = $val->children($i_link)->plaintext;
-                $enc_href = urlencode($href);
-                if($date_in_link){
-                    $data[$key]['raw_link'] = $val->children($i_link)->outertext;
-                    $data[$key]['date'] = $val->children($i_link)->children(0)->plaintext;
+            if(!$find_link) throw new ParserException("Fail to locate the links.");
+            // li to array
+            foreach( $lis as $key => $val) {
+                // $data[$key]['title'] = $val->children($i_link)->plaintext;
+                if(trim($val->plaintext)!=''){ // 有的网页存在<li><br/></li>
+                    $href = $val->children($i_link)->href;
+                    $title = $val->children($i_link)->plaintext;
+                    $enc_href = urlencode($href);
+                    if($date_in_link){
+                        $data[$key]['raw_link'] = $val->children($i_link)->outertext;
+                        $data[$key]['date'] = $val->children($i_link)->children(0)->plaintext;
+                    }
+                    else {
+                        $data[$key]['date'] = $val->children($i_date)->plaintext;
+                        $data[$key]['raw_link'] = $val->children($i_link)->outertext;
+                    } 
+                    $data[$key]['link'] = "<a href='reader.php?url=$enc_href'>$title</a><a href='$href'>访问原网页</a>";
                 }
-                else {
-                    $data[$key]['date'] = $val->children($i_date)->plaintext;
-                    $data[$key]['raw_link'] = $val->children($i_link)->outertext;
-                } 
-                $data[$key]['link'] = "<a href='reader.php?url=$enc_href'>$title</a><a href='$href'>访问原网页</a>";
             }
+            return $data;
+        } catch(CurlException $e){
+          $this-> error = $e->getMessage();
+          echo '如果是本地测试请检查网络连接'.$this-> error;
+        }catch(ParserException $e){
+          $this-> error = $e->getMessage();
+          echo '解析出错'.$this-> error;
         }
-        return $data;
     }
 /*======================================================================*\
     Purpose:    
