@@ -1,5 +1,11 @@
 <?php
 
+// TODO
+// 数据、视图缓存到数据库
+
+// ISSUE
+// 页脚重复，页面之间的导航等重复
+
 // http://localhost/github/php_web_spider/application/news.php
 // echo 'hello';exit();
 // 添加svn 链接sae 发布
@@ -36,14 +42,13 @@ require_once(SPIDER_PATH.'simple_html_dom.php');
 
 // 新闻抓取
 $sp = new Spider;
-$url = 'http://www.ece.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=503';
 
 // $tmp = $sp-> fetch_news('http://www.phbs.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=419');
 // print_r($tmp);exit(0);
 
-// 网址信息数据 建议从数据库中获取
+// 网址信息数据 建议从数据库中获取，相同学院只是不同path，根地址相同
 
-$news['信息工程学院'] = $sp-> fetch_news($url); // 提供特殊形式链接
+$news['信息工程学院'] = $sp-> fetch_news('http://www.ece.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=502'); // 提供特殊形式链接
 $news['汇丰商学院'] = $sp-> fetch_news('http://www.phbs.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=419');
 // $news['化学生物学与生物技术学院'] = $sp-> fetch_news('http://www.scbb.pkusz.edu.cn/index.php?m=content&c=index&a=lists&catid=862');
 
@@ -52,6 +57,8 @@ $news['汇丰商学院'] = $sp-> fetch_news('http://www.phbs.pku.edu.cn/index.ph
 // $news['城市规划与设计学院'] = $sp-> fetch_news('http://sam.pkusz.edu.cn/index.php?m=content&c=index&a=lists&catid=395');
 
 // 讲座信息
+$lecture['信息工程学院'] = $sp-> fetch_news('http://www.ece.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=503');
+$lecture['汇丰商学院'] = $sp-> fetch_news('http://www.phbs.pku.edu.cn/list-812-1.html');
 // $lecture['新材料学院'] = $sp-> fetch_news('http://sam.pkusz.edu.cn/index.php?m=content&c=index&a=lists&catid=809');
 // Undefined variable: find_link in D:\Program Files\xampp\htdocs\GitHub\php_web_spider\core\php_web_spider.php on line 259
 
@@ -102,15 +109,31 @@ $opt_date = array(
 // 数据和视图分离 -----
 require_once('third_party/php_simple_ui/php_simple_ui.php');
 // 一级一级构建方式
+
+// 先将数据放到显示组件容器中
 $form = new ui_JMForm();
-$form->appendSelect('schools',$opt_schools,true)->label('选择1个或多个学院')->attr('data-native-menu','false'); // 视图加强，只是对jQueryMobile有效的样式属性的设置
+$form->appendSelect('schools',$opt_schools,true)->label('选择1个或多个学院')->attr('data-native-menu','false'); // 
+
+$list['news'] = new ui_JMListView($news);
+$list['news']->addFilter('搜索活动');
+$list['lecture'] = new ui_JMListView($lecture);
+$list['lecture']->addFilter('搜索活动');
+
+// 视图加强，只是对jQueryMobile有效的样式属性的设置
 // 逻辑相关的放在构造中，视图加强通过链式做不允许连续append
 
-
+// 再将组件添加到页面中
 // 可以添加多个页面，关联数组id直接生成id
-$pages['setting'] = new ui_JMPage('设置');
+$pages['home'] = new ui_JMPage('主页');
+$pages['setting'] = new ui_JMPage('设置',$form);
 $pages['login'] = new ui_JMPage('登陆');
 $pages['article'] = new ui_JMPage('文章');
+$pages['news'] = new ui_JMPage('新闻',array($form,$list['news']));
+$pages['lecture'] = new ui_JMPage('讲座',$list['lecture']);
+// 页面点缀
+$pages['home']->rightAnchor('setting')->text('设置');;
+
+// 最后汇总页面
 $ui = new ui_jQueryMobile($pages);
 echo $ui;
 

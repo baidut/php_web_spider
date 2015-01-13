@@ -30,15 +30,20 @@ echo $ui;
 */
 
 // Chinese
-// define('TEXT_BACK_TO_TOP','回顶部');
-// define('TEXT_SHARE','分享');
-// define('TEXT_HOME','主页');
+define('TEXT_BACK_TO_TOP','回顶部');
+define('TEXT_BACK','返回');
+define('TEXT_SHARE','分享');
+define('TEXT_HOME','主页');
+define('TEXT_SETTINGS','设置');
 
 // English
-define('TEXT_BACK_TO_TOP','BACK TO TOP');
-define('TEXT_SHARE','SHARE');
-define('TEXT_HOME','HOME');
-define('TEXT_SETTINGS','SETTINGS');
+// define('TEXT_BACK_TO_TOP','BACK TO TOP');
+// define('TEXT_BACK','BACK');
+// define('TEXT_SHARE','SHARE');
+// define('TEXT_HOME','HOME');
+// define('TEXT_SETTINGS','SETTINGS');
+
+
 
 class ui_Dom{
     public $attr = array(); // 'value'=>3 关联数组形式
@@ -154,7 +159,7 @@ class ui_jQueryMobile extends ui_jQuery{
                 // 多个页面时自动生成工具栏，每个页面都显示
                 $this->appendNavbar();
             }
-            else $this->body->append($page);
+            else $this->body->append($pages);
         }
     }
     function appendPage($title){
@@ -179,7 +184,7 @@ class ui_jQueryMobile extends ui_jQuery{
 }
 
 class ui_JMDom extends ui_Dom{
-    function __construct($role,$data) {
+    function __construct($role,$data) { // div data-role
         parent::__construct();
         // 根据不同UI容器识别数据装入
         $ap = null;
@@ -192,9 +197,28 @@ class ui_JMDom extends ui_Dom{
                 }
                 $ap = $ul;
                 break;
+            case 'button':
+            // <a href="#" data-role="button" data-icon="home">首页</a>
+                $this->tag = 'a';
+                switch($data){
+                    case 'home':
+                    case 'search': 
+                    case 'info':
+                        $this->icon($data);
+                        break;
+                    case 'setting':
+                        $this->icon('gear');
+                        break;
+                }
+                // TODO 外部链接的设置 如果以http开头则为外部，不能直接#加id
+                $this->attr('href','#'.$data);
+                break;
         }
         $this->attr('data-role',$role);
         $this->append($ap);
+    }
+    function icon($value){
+        $this->attr('data-icon',$value);
     }
 }
 
@@ -222,7 +246,12 @@ class ui_JMPage extends ui_Dom{
         $this->append($this->content);
 
         $this->footer = new ui_Dom('div');
-        $this->footer->attr('data-role','footer')->text('<a href="#" data-role="button" data-icon="plus">'.TEXT_SHARE.'</a><a href="javascript:scroll(0,0)" data-role="button" data-icon="arrow-u">'.TEXT_BACK_TO_TOP.'</a>');
+        $this->footer->attr('data-role','footer')->text(
+             '<a href="#" data-role="button" data-icon="plus">'.TEXT_SHARE.'</a>'
+            .'<a href="javascript:history.go(-1)" data-role="button" data-icon="back">'.TEXT_BACK.'</a>'
+            .'<a href="javascript:scroll(0,0)" data-role="button" data-icon="arrow-u">'.TEXT_BACK_TO_TOP.'</a>'
+            .'<a href="#home" data-role="button" data-icon="home">'.TEXT_HOME.'</a>'
+            );
         $this->append($this->footer);
 
         if(!is_null($content)){
@@ -241,6 +270,15 @@ class ui_JMPage extends ui_Dom{
     }
     function appendContent($node){
     	$this->content->append($node);
+    }
+    function rightAnchor($id){
+        // 自定义ICON属于视图增强:rightAnchor('home')->icon('gear');
+        // 按钮显示文本：rightAnchor('home')->text('内容');
+        // TODO: 没有文本时，按钮会很小 data-iconpos 设置为 "notext"：
+        return $this->header->append(new ui_JMDom('button',$id))->attr('class','ui-btn-right');
+    }
+    function leftAnchor($id,$icon){
+        $this->header->append(new ui_JMDom('button',$id)); 
     }
 }
 
