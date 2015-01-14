@@ -112,7 +112,7 @@ require_once('third_party/php_simple_ui/php_simple_ui.php');
 
 // 先将数据放到显示组件容器中
 $form = new ui_JMForm();
-$form->appendSelect('schools',$opt_schools,true)->label('选择1个或多个学院')->attr('data-native-menu','false'); // 
+$form->appendSelect('schools',$opt_schools,true)->attr('data-native-menu','false')->label('选择1个或多个学院'); // 
 
 $list['news'] = new ui_JMListView($news);
 $list['news']->addFilter('搜索活动');

@@ -43,11 +43,13 @@ define('TEXT_SETTINGS','设置');
 // define('TEXT_HOME','HOME');
 // define('TEXT_SETTINGS','SETTINGS');
 
-
-
 class ui_Dom{
     public $attr = array(); // 'value'=>3 关联数组形式
-    public $children = array();
+    public $children = array(); // 必须公开
+    public $parent = null; // 必须公开 否则无法设置？ 创建的时候传入父元素指针，这样比较安全
+ //Warning: Creating default object from empty value 如果对private进行操作，则会出现这个warning
+
+
     private $tag = null;
     private $innertext = '';  // 是否需要识别html标签的能力？可以解析出内容——html_simple_dom 选择性分析比较高效
 
@@ -69,23 +71,35 @@ class ui_Dom{
 		}
 		$ret.='>';
 		foreach($this->children as $child){
-			$ret.=$child;
+			$ret.=$child; // 如果child是一个数组？
 		}
 		return $ret.$this->innertext.'</'.$this->tag.'>';
 	}
-
+// TODO： 这几个方法需要改进
 	function append($node,$content=''){ // TODO 这里的$content改为属性集合或属性
         // new Dom('div',$children,$attrs) new Dom('div',$innerHTML,$attrs)
         // append(new Dom('div','this is a div'), array('color'=>'yellow'));
 		$ret = is_string($node)? (new ui_Dom($node,$content) ): $node;
 		array_push($this->children,$ret); 
+        if(is_object($ret))$ret->parent = $this;
 		return $ret;
 	}
 	function prepend($node){$ret = new ui_Dom($node); array_unshift($this->children,$ret); return $ret;}
-	function after($node){}
-	function before($node){}
+
+	function after($node){
+        $key = array_search($this->parent->children,$this);
+        array_splice($this->parent->children,$key+1,0,array($node));
+    }
+	function before($node){
+        // $this->parent->append($node); // TODO 可能不存在父元素
+        $key = array_search($this,$this->parent->children);
+        // echo $this->parent.'------'.$key;
+        $node->parent = $this->parent;
+        array_splice($this->parent->children,$key,0,array($node)); // 注意要用array
+        // echo $this->parent;die();
+    }
 	function text($t=null){
-        if(is_null($t))return $this->innertext; 
+        if(is_null($t))return $this->innertext;
         // 不开放$this->innertext成员，用这个函数可以解析元素，然后插入
         $this->innertext = $t;return $this;
     }
@@ -123,8 +137,12 @@ class ui_Dom{
     // ui相关
     // 添加指向的标签
     function label($text){
-    	$this->appendText('<label for="'.$this->attr('name').'">'.$text.'</label>');
-    	return $this;
+        // label不能在元素内部
+        $lab = new ui_Dom('label',$text);
+        $lab->attr('for',$this->attr('name'));
+        // echo $lab;
+        // echo '-------------';
+    	return $this->before($lab);
     }
 }
 
@@ -343,6 +361,7 @@ class ui_JMForm extends ui_Dom{
     // 视图方面默认提供最优的，如果需要调整则通过链式修改相应属性
     function appendSelect($name,$data,$multiple=false){
     	$select = new ui_Dom('select');
+        $select->attr('name',$name);
     	if($multiple){
     		$select->attr('multiple','multiple');
     		$select->appendText('<option>你可以选择多个</option>');
