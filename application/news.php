@@ -13,13 +13,15 @@
 // TODO 按时间，按学院
 // TODO 链接默认从新标签页打开 页面配置功能
 
+// 已完成
+// 分割链接，右侧小图标转入原来网页，默认进入子页面，将新闻内容提取并呈现
+
 // TOOD
 // 添加新闻缩略图
 // 添加小图标 北大，清华，哈工大或者学院标记
-// 分割链接，右侧小图标转入原来网页，默认进入子页面，将新闻内容提取并呈现
+
 
 // 用户、社区功能
-
 // 小工具 通过AJAX 过滤时间
 // 配置搜索选项，通过提交表单，不用AJAX
 
@@ -30,17 +32,18 @@
 // 分页 显示更多
 // 自动填入过滤常用词 新闻 通知 学术讲座
 
-// Fatal error: Call to a member function find() on a non-object in D:\Program Files\xampp\htdocs\GitHub\php_web_spider\core\php_web_spider.php on line 222
 
 
+// 获取配置信息
+$filter = (isset($_GET['filter']))? $_GET['filter']:"week";
 
 header("Content-type:text/html;charset=utf-8");
 
+// 新闻抓取
 define('SPIDER_PATH','../core/');
 require_once(SPIDER_PATH.'php_web_spider.php');
 require_once(SPIDER_PATH.'simple_html_dom.php');
 
-// 新闻抓取
 $sp = new Spider;
 
 // $tmp = $sp-> fetch_news('http://www.phbs.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=419');
@@ -48,8 +51,8 @@ $sp = new Spider;
 
 // 网址信息数据 建议从数据库中获取，相同学院只是不同path，根地址相同
 
-$news['信息工程学院'] = $sp-> fetch_news('http://www.ece.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=502'); // 提供特殊形式链接
-$news['汇丰商学院'] = $sp-> fetch_news('http://www.phbs.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=419');
+$news['信息工程学院'] = $sp-> fetch_news('http://www.ece.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=502',$filter); // 提供特殊形式链接
+$news['汇丰商学院'] = $sp-> fetch_news('http://www.phbs.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=419',$filter);
 // $news['化学生物学与生物技术学院'] = $sp-> fetch_news('http://www.scbb.pkusz.edu.cn/index.php?m=content&c=index&a=lists&catid=862');
 
 // $news['环境与能源学院'] = $sp-> fetch_news('http://see.pkusz.edu.cn/news_cn.aspx');
@@ -57,8 +60,8 @@ $news['汇丰商学院'] = $sp-> fetch_news('http://www.phbs.pku.edu.cn/index.ph
 // $news['城市规划与设计学院'] = $sp-> fetch_news('http://sam.pkusz.edu.cn/index.php?m=content&c=index&a=lists&catid=395');
 
 // 讲座信息
-$lecture['信息工程学院'] = $sp-> fetch_news('http://www.ece.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=503');
-$lecture['汇丰商学院'] = $sp-> fetch_news('http://www.phbs.pku.edu.cn/list-812-1.html');
+$lecture['信息工程学院'] = $sp-> fetch_news('http://www.ece.pku.edu.cn/index.php?m=content&c=index&a=lists&catid=503',$filter);
+$lecture['汇丰商学院'] = $sp-> fetch_news('http://www.phbs.pku.edu.cn/list-812-1.html',$filter);
 // $lecture['新材料学院'] = $sp-> fetch_news('http://sam.pkusz.edu.cn/index.php?m=content&c=index&a=lists&catid=809');
 // Undefined variable: find_link in D:\Program Files\xampp\htdocs\GitHub\php_web_spider\core\php_web_spider.php on line 259
 
@@ -92,19 +95,12 @@ $opt_content = array(
 	'讲座'=>'LECTURE',
 
 	);
-$opt_date = array(
+$opt_time = array(
 	'一周内'=>'week',
 	'一月内'=>'month',
 	);
 // 分页模式-每页显示个数，显示更多（AJAX）
 // pageView传入提取内容的相关启发信息，得到页面的核心内容，然后呈现，并提供返回按钮 核心内容可能为图片
-
-
-// 根据get获取配置信息
-
-
-
-
 
 // 数据和视图分离 -----
 require_once('third_party/php_simple_ui/php_simple_ui.php');
@@ -112,7 +108,9 @@ require_once('third_party/php_simple_ui/php_simple_ui.php');
 
 // 先将数据放到显示组件容器中
 $form = new ui_JMForm();
-$form->appendSelect('schools',$opt_schools,true)->attr('data-native-menu','false')->label('选择1个或多个学院'); // 
+$form->appendSelect('schools',$opt_schools,true)->attr('data-native-menu','false')->label('选择1个或多个学院'); 
+$form->appendSelect('time',$opt_time,false)->attr('data-native-menu','false')->label('选择时间段'); 
+// 注意如果一个元素的label有多个，则点击后会显示多个标签的文本。因此页面不要有重复元素 
 
 $list['news'] = new ui_JMListView($news);
 $list['news']->addFilter('搜索活动');
@@ -125,10 +123,10 @@ $list['lecture']->addFilter('搜索活动');
 // 再将组件添加到页面中
 // 可以添加多个页面，关联数组id直接生成id
 $pages['home'] = new ui_JMPage('主页');
-$pages['setting'] = new ui_JMPage('设置',$form);
+$pages['setting'] = new ui_JMPage('设置',array($form));
 $pages['login'] = new ui_JMPage('登陆');
 $pages['article'] = new ui_JMPage('文章');
-$pages['news'] = new ui_JMPage('新闻',array($form,$list['news']));
+$pages['news'] = new ui_JMPage('新闻',$list['news']);
 $pages['lecture'] = new ui_JMPage('讲座',$list['lecture']);
 // 页面点缀
 $pages['home']->rightAnchor('setting')->text('设置');;

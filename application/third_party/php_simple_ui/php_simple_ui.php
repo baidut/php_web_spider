@@ -139,7 +139,7 @@ class ui_Dom{
     function label($text){
         // label不能在元素内部
         $lab = new ui_Dom('label',$text);
-        $lab->attr('for',$this->attr('name'));
+        $lab->attr('for',$this->attr('id'));// 注意label和id关联
         // echo $lab;
         // echo '-------------';
     	return $this->before($lab);
@@ -153,10 +153,20 @@ class ui_jQuery extends ui_Dom{
 	public $body;
 	function __construct() {
         parent::__construct('html');
-        $this->head = $this->append('head','<script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>');
+        $this->head = $this->append('head'/*,'<script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>'*/);
         $this->body = $this->append('body');
     }
 }
+
+
+/*<head> 
+    <meta charset="utf-8" />
+    <title>Hello HTML5</title>  
+     
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0b2/jquery.mobile-1.0b2.min.css" />
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/mobile/1.0b2/jquery.mobile-1.0b2.min.js"></script>
+</head> */
 
 class ui_jQueryMobile extends ui_jQuery{
     private $pages = array();
@@ -165,8 +175,14 @@ class ui_jQueryMobile extends ui_jQuery{
         parent::__construct();
         $script = new ui_Dom('script');
         $script->src='';
-        $this->head->appendText('<link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css"><script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>');
-
+        //width=device-width, initial-scale=1 可以使内容更适合终端屏幕，否则太小看不清
+        // $this->head->appendText('<meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css"><script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>');
+        // newest jQueryMobile 2015-1-19 http://jquerymobile.com/download/
+        $this->head->appendText('<meta name="viewport" content="width=device-width, initial-scale=1">'
+        .'<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css"/>'
+        .'<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>'
+        .'<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>');
+        
         if(!is_null($pages)){
             if(is_array($pages)){
                 foreach($pages as $key => $page){
@@ -361,7 +377,8 @@ class ui_JMForm extends ui_Dom{
     // 视图方面默认提供最优的，如果需要调整则通过链式修改相应属性
     function appendSelect($name,$data,$multiple=false){
     	$select = new ui_Dom('select');
-        $select->attr('name',$name);
+        $select->attr('name',$name); // name用于提交
+        $select->attr('id',$name); // id和label关联
     	if($multiple){
     		$select->attr('multiple','multiple');
     		$select->appendText('<option>你可以选择多个</option>');

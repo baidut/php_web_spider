@@ -10,6 +10,10 @@ https://github.com/baidut/php_web_spider
 Feature:
 -fetch web pages 网页抓取
 -get data 数据提取
+
+TODO:
+智能配置模式，输入页面元素关键字，快速定位，初始化信息位置到数据库，之后采集
+直接定位，如果没有找到再重新进行初始化，初始化失败再请求人工配置
 \*======================================================================*/
 define('DATE_PATTEN',"/^d{4}[-](0?[1-9]|1[012])[-](0?[1-9]|[12][0-9]|3[01])(s+(0?[0-9]|1[0-9]|2[0-3]):(0?[0-9]|[1-5][0-9]):(0?[0-9]|[1-5][0-9]))?$/");
 
@@ -227,7 +231,7 @@ class Spider{
     初始化先分析ul结构，提取出时间字段的位置和链接的位置后快速处理
     转为数组结构
 \*======================================================================*/
-    function fetch_news($_url=null){ 
+    function fetch_news($_url=null,$filter=null){ 
         try{
             if($_url) $this-> fetch($_url);// throw可以跨函数
             $html = str_get_html($this->html);
@@ -286,6 +290,21 @@ class Spider{
                         $data[$key]['raw_link'] = $val->children($i_link)->outertext;
                     } 
                     $data[$key]['link'] = "<a href='reader.php?url=$enc_href'>$title</a><a href='$href'>访问原网页</a>";
+
+                    // 按日期过滤结果，后期通过数据库解决
+                    $d = strtotime( $data[$key]['date'] );
+                    $today = strtotime(date("Y-m-d"));
+                    $dif_days = round(($today-$d)/3600/24);
+                    $break = false;
+                    switch($filter){
+                        case 'week':
+                            if( $dif_days> 7 )
+                                $break = true;
+                        case 'month':
+                            if( $dif_days> 30 )
+                                $break = true;
+                    }
+                    if($break) break;
                 }
             }
             return $data;
