@@ -1,54 +1,38 @@
 <?php 
 
-// 目的：专注核心数据内容，不关心前端ui实现
+/**
+ * php_simple_ui.php
+ * 
+ * @author    Zhenqiang Ying <https://github.com/baidut>
+ * @example       
+ * @todo      
+ */
 
+/**
+ * Use config.php default, you can specify personal config file before including this file  
+ * @example 
+ *  define('CONFIG_FILE','my_config.php');
+ *  include('php_simple_ui.php');  
+ */
 
-// localhost/GitHub/php_simple_ui/php_simple_ui.php
-// 方案1：输出jQuery语句在客户端创建
-// 方案2：服务器端生成ui，需要消耗计算资源，如果便捷性大于速度牺牲的话有意义，用简短的代码，整洁的结构控制ui输出
+require_once( defined('CONFIG_FILE')? CONFIG_FILE : 'config.php' );
 
-// 相关项目
-// phpQuery—基于jQuery的PHP实现http://www.cnblogs.com/in-loading/archive/2012/04/11/2442697.html
-
-/*ui_Dom的使用
-$ui = new ui_Dom('html');
-$body = $ui->append('body');
-$head = $ui->prepend('head');
-$head->html('<title>php_simple_ui</title>');
-$body->bgcolor = 'yellow';
-// 链式
-$body->append('input')->attr('type','button')->val('hello world');
-// text('hello world');
-echo $ui;
-*/
-
-/*
-$ui = new ui_jQueryMobile();
-echo $ui;
-
-// <html><head><script src="http://code.jquery.com/jquery-1.8.3.min.js"></script><link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css"><script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></head><body></body></html>
-*/
-
-// Chinese
-define('TEXT_BACK_TO_TOP','回顶部');
-define('TEXT_BACK','返回');
-define('TEXT_SHARE','分享');
-define('TEXT_HOME','主页');
-define('TEXT_SETTINGS','设置');
-
-// English
-// define('TEXT_BACK_TO_TOP','BACK TO TOP');
-// define('TEXT_BACK','BACK');
-// define('TEXT_SHARE','SHARE');
-// define('TEXT_HOME','HOME');
-// define('TEXT_SETTINGS','SETTINGS');
-
+/**
+ * html dom
+ * @example 
+ *  include('php_simple_ui.php');
+ *  $ui = new ui_Dom('html');
+ *  $body = $ui->append('body');
+ *  $head = $ui->prepend('head');
+ *  $head->html('<title>php_simple_ui</title>');
+ *  $body->bgcolor = 'yellow';
+ *  $body->append('input')->attr('type','button')->val('hello world'); // 链式
+ *  echo $ui;
+ */
 class ui_Dom{
     public $attr = array(); // 'value'=>3 关联数组形式
     public $children = array(); // 必须公开
     public $parent = null; // 必须公开 否则无法设置？ 创建的时候传入父元素指针，这样比较安全
- //Warning: Creating default object from empty value 如果对private进行操作，则会出现这个warning
-
 
     private $tag = null;
     private $innertext = '';  // 是否需要识别html标签的能力？可以解析出内容——html_simple_dom 选择性分析比较高效
@@ -146,43 +130,42 @@ class ui_Dom{
     }
 }
 
-// jQuery Mobile UI 建模
-
+/**
+ * html with jQuery installed
+ * 
+ * @example       
+ * @todo       
+ */
 class ui_jQuery extends ui_Dom{
 	public $head;
 	public $body;
+    /**
+     * @param   string $version The version of jQuery
+     * @return  void
+     */
 	function __construct() {
         parent::__construct('html');
-        $this->head = $this->append('head'/*,'<script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>'*/);
-        $this->body = $this->append('body');
+        $this->head = $this->append('head','<script src="http://code.jquery.com/jquery-'.JQ_VERSION.'.min.js"></script>');
+        $this->body = $this->append('body'); 
     }
 }
 
-
-/*<head> 
-    <meta charset="utf-8" />
-    <title>Hello HTML5</title>  
-     
-    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0b2/jquery.mobile-1.0b2.min.css" />
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
-    <script type="text/javascript" src="http://code.jquery.com/mobile/1.0b2/jquery.mobile-1.0b2.min.js"></script>
-</head> */
-
+/**
+ * html dom
+ * @example 
+ *  include('php_simple_ui.php');
+ *  $ui = new ui_jQueryMobile();
+ *  echo $ui; // <html><head><script src="http://code.jquery.com/jquery-1.8.3.min.js"></script><link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css"><script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></head><body></body></html>
+ */
 class ui_jQueryMobile extends ui_jQuery{
     private $pages = array();
 
 	function __construct($pages=null) {
         parent::__construct();
-        $script = new ui_Dom('script');
-        $script->src='';
-        //width=device-width, initial-scale=1 可以使内容更适合终端屏幕，否则太小看不清
-        // $this->head->appendText('<meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css"><script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>');
-        // newest jQueryMobile 2015-1-19 http://jquerymobile.com/download/
-        $this->head->appendText('<meta name="viewport" content="width=device-width, initial-scale=1">'
-        .'<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css"/>'
-        .'<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>'
-        .'<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>');
-        
+        $this->head->appendText(
+             '<meta name="viewport" content="width=device-width, initial-scale=1">
+              <link rel="stylesheet" href="http://code.jquery.com/mobile/'.JM_VERSION.'/jquery.mobile-'.JM_VERSION.'.min.css"/>
+              <script src="http://code.jquery.com/mobile/'.JM_VERSION.'/jquery.mobile-'.JM_VERSION.'.min.js"></script>');
         if(!is_null($pages)){
             if(is_array($pages)){
                 foreach($pages as $key => $page){
@@ -385,7 +368,8 @@ class ui_JMForm extends ui_Dom{
     	}
     	foreach ($data as $key => $value) {
     		// 对于不可能继续追加子元素的情况采用appendText比较高效简单
-    		$select->appendText("<option value='$value'>$key</option>");
+            $text = is_numeric($key)? $value : $key; // 如果不是关联数组，则值和显示的文本一致
+    		$select->appendText("<option value='$value'>$text</option>");
     	}
     	$this->append($select);
     	return $select; // 继续对select进行设置

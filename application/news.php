@@ -79,6 +79,9 @@ $lecture['汇丰商学院'] = $sp-> fetch_news('http://www.phbs.pku.edu.cn/list-
 // 配置项
 // 新闻，学术讲座，活动
 // 配置页面，提供学院选择配置，内容配置，日期配置
+
+
+// 内容配置
 $opt_schools = array(
 	'信工'=>'SECE',
 	'化生'=>'SCBB',
@@ -99,6 +102,13 @@ $opt_time = array(
 	'一周内'=>'week',
 	'一月内'=>'month',
 	);
+// 视图界面配置
+$opt_theme = array('a','b','c','d','e');
+$opt_jq_version = array('1.11.1','1.8.3','1.6.2');
+$opt_jm_version = array('1.4.5','1.3.2','1.2.1','1.1.2','1.0.1','1.0b2');
+
+// w3cschool : jq1.8.3 + jm1.3.2
+
 // 分页模式-每页显示个数，显示更多（AJAX）
 // pageView传入提取内容的相关启发信息，得到页面的核心内容，然后呈现，并提供返回按钮 核心内容可能为图片
 
@@ -107,9 +117,13 @@ require_once('third_party/php_simple_ui/php_simple_ui.php');
 // 一级一级构建方式
 
 // 先将数据放到显示组件容器中
-$form = new ui_JMForm();
-$form->appendSelect('schools',$opt_schools,true)->attr('data-native-menu','false')->label('选择1个或多个学院'); 
-$form->appendSelect('time',$opt_time,false)->attr('data-native-menu','false')->label('选择时间段'); 
+$form_content = new ui_JMForm();
+$form_content->appendSelect('schools',$opt_schools,true)->attr('data-native-menu','false')->label('选择1个或多个学院'); 
+$form_content->appendSelect('time',$opt_time,false)->attr('data-native-menu','false')->label('选择时间段'); 
+
+$form_view = new ui_JMForm();
+$form_view->appendSelect('jq_version',$opt_jq_version,false)->attr('data-native-menu','false')->label('jQuery 版本'); 
+$form_view->appendSelect('jm_version',$opt_jm_version,false)->attr('data-native-menu','false')->label('jQuery Mobile 版本'); 
 // 注意如果一个元素的label有多个，则点击后会显示多个标签的文本。因此页面不要有重复元素 
 
 $list['news'] = new ui_JMListView($news);
@@ -123,7 +137,7 @@ $list['lecture']->addFilter('搜索活动');
 // 再将组件添加到页面中
 // 可以添加多个页面，关联数组id直接生成id
 $pages['home'] = new ui_JMPage('主页');
-$pages['setting'] = new ui_JMPage('设置',array($form));
+$pages['setting'] = new ui_JMPage('设置',array($form_content,$form_view));
 $pages['login'] = new ui_JMPage('登陆');
 $pages['article'] = new ui_JMPage('文章');
 $pages['news'] = new ui_JMPage('新闻',$list['news']);
