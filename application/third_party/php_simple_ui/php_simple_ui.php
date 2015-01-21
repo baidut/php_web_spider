@@ -30,8 +30,9 @@ require_once( defined('CONFIG_FILE')? CONFIG_FILE : 'config.php' );
  *  echo $ui;
  */
 class ui_Dom{
-    public $attr = array(); // 'value'=>3 关联数组形式
-    public $children = array(); // 必须公开
+
+    private $attr = array(); 
+    public $children = array();
     public $parent = null; // 必须公开 否则无法设置？ 创建的时候传入父元素指针，这样比较安全
 
     private $tag = null;
@@ -143,9 +144,31 @@ class ui_jQuery extends ui_Dom{
      * @param   string $version The version of jQuery
      * @return  void
      */
+// $.post(obj.action,
+// formData,
+// function(data,status){
+// //alert("Data: " + data + "\nStatus: " + status);
+// alert("Action: " + obj.action + formData );
+// });
+    // 表单提交采用AJAX,如果成功，则将表单替换为返回数据（带有UI），如果失败，则弹窗
 	function __construct() {
         parent::__construct('html');
-        $this->head = $this->append('head','<script src="http://code.jquery.com/jquery-'.JQ_VERSION.'.min.js"></script>');
+        $function_ui_submit = '
+        <script>
+        function ui_submit(obj){
+            var data = $(obj).serialize();
+            $.ajax({
+              type: "POST",
+              url: obj.action,
+              data: data,
+              success: function(data,status){alert("Data: " + data + "\nStatus: " + status);},
+              error: function(data,status){alert("Action: " + obj.action + formData);},
+            });
+            return false;
+        }
+        </script>
+        '; 
+        $this->head = $this->append('head','<script src="http://code.jquery.com/jquery-'.JQ_VERSION.'.min.js"></script>'.$function_ui_submit);
         $this->body = $this->append('body'); 
     }
 }
@@ -265,7 +288,7 @@ class ui_JMPage extends ui_Dom{
         $this->footer = new ui_Dom('div');
         $this->footer->attr('data-role','footer')->text(
              '<a href="#" data-role="button" data-icon="plus">'.TEXT_SHARE.'</a>'
-            .'<a href="javascript:history.go(-1)" data-role="button" data-icon="back">'.TEXT_BACK.'</a>'
+            .'<a href="javascript:history.go(-1)" data-role="button" data-icon="back" data-direction="reverse">'.TEXT_BACK.'</a>'
             .'<a href="javascript:scroll(0,0)" data-role="button" data-icon="arrow-u">'.TEXT_BACK_TO_TOP.'</a>'
             .'<a href="#home" data-role="button" data-icon="home">'.TEXT_HOME.'</a>'
             );
@@ -354,6 +377,15 @@ class ui_JMForm extends ui_Dom{
         parent::__construct('form');
         $this->attr('method',$method);
         $this->attr('action',$action);
+        $this->attr('onsubmit','ui_submit(this)');
+        
+        $this->appendText('<button type="submit" onclick="return ui_submit(this.parentElement);">'.TEXT_SUBMIT.'</button>');
+        // return false 防止表单提交，则无法触发onsubmit，不能用form的onsubmit方法，无法阻止
+
+
+        // 添加域容器 需要 label 和表单元素在宽屏幕上显示正常
+        // $this->append('action',$action);
+        // <div data-role="fieldcontain">
     }
     // labels and doms
     // 与CI的表单辅助函数不同的是，这里不需要了解表单的结构，只需要明确需要什么数据即可
@@ -373,6 +405,31 @@ class ui_JMForm extends ui_Dom{
     	}
     	$this->append($select);
     	return $select; // 继续对select进行设置
+    }
+    function appendInput($type,$name,$placeholder){
+        $input = new ui_Dom('input');
+        $input->attr('name',$name); 
+        $input->attr('id',$name); 
+        $input->attr('type',$type);
+        $this->append($input);
+        return $input; 
+    }
+    function appendInputText($name,$placeholder){
+        $input = new ui_Dom('input');
+// <input type="text" name="fname" id="fname">
+        $input->attr('name',$name); 
+        $input->attr('id',$name); 
+        $input->attr('type','text');
+        $this->append($input);
+        return $input; // 继续对select进行设置
+    }
+    function appendInputPassword($name,$placeholder){
+        $input = new ui_Dom('input');
+        $input->attr('name',$name); 
+        $input->attr('id',$name); 
+        $input->attr('type','password');
+        $this->append($input);
+        return $input; 
     }
     function ajax(){
     	$this->attr('onsubmit','javascript:return ajax();');

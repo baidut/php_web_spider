@@ -39,10 +39,10 @@ $filter = (isset($_GET['filter']))? $_GET['filter']:"week";
 
 header("Content-type:text/html;charset=utf-8");
 
-// 新闻抓取
+// 根据配置信息抓取数据
 define('SPIDER_PATH','../core/');
 require_once(SPIDER_PATH.'php_web_spider.php');
-require_once(SPIDER_PATH.'simple_html_dom.php');
+require_once(SPIDER_PATH.'simple_html_dom.php'); // 会分析提交的UI配置信息
 
 $sp = new Spider;
 
@@ -124,6 +124,12 @@ $form_content->appendSelect('time',$opt_time,false)->attr('data-native-menu','fa
 $form_view = new ui_JMForm();
 $form_view->appendSelect('jq_version',$opt_jq_version,false)->attr('data-native-menu','false')->label('jQuery 版本'); 
 $form_view->appendSelect('jm_version',$opt_jm_version,false)->attr('data-native-menu','false')->label('jQuery Mobile 版本'); 
+
+$form_login_lib = new ui_JMForm('lib.php');
+$form_login_lib->appendInput('text','student_no','登录名／证号')->label('用户名');
+$form_login_lib->appendInput('password','lib_psw','初始密码为8位出生年月日')->label('密码');
+
+
 // 注意如果一个元素的label有多个，则点击后会显示多个标签的文本。因此页面不要有重复元素 
 
 $list['news'] = new ui_JMListView($news);
@@ -138,7 +144,8 @@ $list['lecture']->addFilter('搜索活动');
 // 可以添加多个页面，关联数组id直接生成id
 $pages['home'] = new ui_JMPage('主页');
 $pages['setting'] = new ui_JMPage('设置',array($form_content,$form_view));
-$pages['login'] = new ui_JMPage('登陆');
+// $pages['login'] = new ui_JMPage('登陆');
+$pages['lib'] = new ui_JMPage('图书馆',$form_login_lib);
 $pages['article'] = new ui_JMPage('文章');
 $pages['news'] = new ui_JMPage('新闻',$list['news']);
 $pages['lecture'] = new ui_JMPage('讲座',$list['lecture']);

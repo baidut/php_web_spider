@@ -5,14 +5,16 @@
  * @todo      切换语言，版本，主题需要重新获取网页，不适合需要方便切换外观的用户
  */
 
+// http://localhost/github/php_web_spider/application/news.php?lang=Chinese&jm_version=1.3.2
 // 这里可以定义全局变量，避免使用临时变量
 switch(isset($_POST['lang'])?$_POST['lang']:'English'){
-case '简体中文':
+case 'Chinese': //简体中文
 	define('TEXT_BACK_TO_TOP','回顶部');
 	define('TEXT_BACK','返回');
 	define('TEXT_SHARE','分享');
 	define('TEXT_HOME','主页');
 	define('TEXT_SETTINGS','设置');
+	define('TEXT_SUBMIT','提交');
 	break;
 default:
 case 'English':
@@ -21,6 +23,7 @@ case 'English':
 	define('TEXT_SHARE','SHARE');
 	define('TEXT_HOME','HOME');
 	define('TEXT_SETTINGS','SETTINGS');
+	define('TEXT_SUBMIT','SUBMIT');
 	break;
 }
 
