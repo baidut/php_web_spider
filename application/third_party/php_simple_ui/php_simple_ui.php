@@ -196,7 +196,6 @@ class ui_jQueryMobile extends ui_jQuery{
                    array_push($this->pages,$page);
                    // $this->appendPage($page)->appendContent(new ui_JMDom('navibar',));
                 }
-                // 多个页面时自动生成工具栏，每个页面都显示
                 $this->appendNavbar();
             }
             else $this->body->append($pages);
@@ -212,12 +211,14 @@ class ui_jQueryMobile extends ui_jQuery{
         if(is_null($data)){
             $nav = array();
             foreach ($this->pages as $key => $page){
+                if($key == 'home') continue; // 不显示主页
                 $title = $page->title();
                 $id = $page->id;
                 $nav[$title] = '#'.$id;
             }
             foreach($this->pages as $key=>$page){
-                $page->header->append(new ui_JMDom('navbar',$nav));
+                // 改为导航栏只有主页显示，所有页面显示的为工具栏
+                if($key=='home')$page->header->append(new ui_JMDom('navbar',$nav));
             }
         }
     }
@@ -232,7 +233,7 @@ class ui_JMDom extends ui_Dom{
             case 'navbar':
                 $ul = new ui_Dom('ul');
                 foreach ($data as $key => $value) {
-                    $ul->append(new ui_Dom('li'))->append(new ui_Dom('a',$key))->attr('href',$value);
+                    $ul->append(new ui_Dom('li'))->append(new ui_Dom('a',$key))->attr('href',$value)->attr('data-transition','slide');
                     // <li><a href="#anylink">搜索</a></li>
                 }
                 $ap = $ul;
@@ -288,7 +289,7 @@ class ui_JMPage extends ui_Dom{
         $this->footer = new ui_Dom('div');
         $this->footer->attr('data-role','footer')->text(
              '<a href="#" data-role="button" data-icon="plus">'.TEXT_SHARE.'</a>'
-            .'<a href="javascript:history.go(-1)" data-role="button" data-icon="back" data-direction="reverse">'.TEXT_BACK.'</a>'
+            .'<a href="javascript:history.go(-1)" data-role="button" data-icon="back">'.TEXT_BACK.'</a>'
             .'<a href="javascript:scroll(0,0)" data-role="button" data-icon="arrow-u">'.TEXT_BACK_TO_TOP.'</a>'
             .'<a href="#home" data-role="button" data-icon="home">'.TEXT_HOME.'</a>'
             );

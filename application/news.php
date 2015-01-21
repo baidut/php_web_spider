@@ -129,7 +129,9 @@ $form_login_lib = new ui_JMForm('lib.php');
 $form_login_lib->appendInput('text','student_no','登录名／证号')->label('用户名');
 $form_login_lib->appendInput('password','lib_psw','初始密码为8位出生年月日')->label('密码');
 
-
+$list_book = new ui_Dom('a','你还没有登陆，点击登陆');
+$list_book->attr('href','#login');
+$list_book->attr('data-rel','dialog');
 // 注意如果一个元素的label有多个，则点击后会显示多个标签的文本。因此页面不要有重复元素 
 
 $list['news'] = new ui_JMListView($news);
@@ -144,8 +146,8 @@ $list['lecture']->addFilter('搜索活动');
 // 可以添加多个页面，关联数组id直接生成id
 $pages['home'] = new ui_JMPage('主页');
 $pages['setting'] = new ui_JMPage('设置',array($form_content,$form_view));
-// $pages['login'] = new ui_JMPage('登陆');
-$pages['lib'] = new ui_JMPage('图书馆',$form_login_lib);
+$pages['login'] = new ui_JMPage('登陆',$form_login_lib); // 登陆弹窗
+$pages['lib'] = new ui_JMPage('图书馆',$list_book);
 $pages['article'] = new ui_JMPage('文章');
 $pages['news'] = new ui_JMPage('新闻',$list['news']);
 $pages['lecture'] = new ui_JMPage('讲座',$list['lecture']);
