@@ -140,10 +140,6 @@ class ui_Dom{
 class ui_jQuery extends ui_Dom{
 	public $head;
 	public $body;
-    /**
-     * @param   string $version The version of jQuery
-     * @return  void
-     */
 // $.post(obj.action,
 // formData,
 // function(data,status){
@@ -151,24 +147,13 @@ class ui_jQuery extends ui_Dom{
 // alert("Action: " + obj.action + formData );
 // });
     // 表单提交采用AJAX,如果成功，则将表单替换为返回数据（带有UI），如果失败，则弹窗
+    /**
+     *
+     */
 	function __construct() {
         parent::__construct('html');
-        $function_ui_submit = '
-        <script>
-        function ui_submit(obj){
-            var data = $(obj).serialize();
-            $.ajax({
-              type: "POST",
-              url: obj.action,
-              data: data,
-              success: function(data,status){$(obj).after(data);$(obj).remove();},
-              error: function(data,status){alert("Data: " + data + "\nStatus: " + status);},
-            });
-            return false;
-        }
-        </script>
-        '; 
-        $this->head = $this->append('head','<script src="http://code.jquery.com/jquery-'.JQ_VERSION.'.min.js"></script>'.$function_ui_submit);
+
+        $this->head = $this->append('head','<script src="http://code.jquery.com/jquery-'.JQ_VERSION.'.min.js"></script>');
         $this->body = $this->append('body'); 
     }
 }
@@ -188,7 +173,7 @@ class ui_jQueryMobile extends ui_jQuery{
         $this->head->appendText(
              '<meta name="viewport" content="width=device-width, initial-scale=1">
               <link rel="stylesheet" href="http://code.jquery.com/mobile/'.JM_VERSION.'/jquery.mobile-'.JM_VERSION.'.min.css"/>
-              <script src="http://code.jquery.com/mobile/'.JM_VERSION.'/jquery.mobile-'.JM_VERSION.'.min.js"></script>');
+              <script src="http://code.jquery.com/mobile/'.JM_VERSION.'/jquery.mobile-'.JM_VERSION.'.min.js"></script><script src="php_simple_ui.js"></script>');
         if(!is_null($pages)){
             if(is_array($pages)){
                 foreach($pages as $key => $page){

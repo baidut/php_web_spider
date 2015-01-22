@@ -32,5 +32,7 @@ define('THEME',isset($_POST['theme'])? $_POST['theme']:'a');
 // Latest version can be found in http://jquerymobile.com/download/
 define('JQ_VERSION',isset($_POST['jq_version'])? $_POST['jq_version']:'1.11.1');
 define('JM_VERSION',isset($_POST['jm_version'])? $_POST['jm_version']:'1.4.5');
+
+// This version have trouble fetching AJAX data(always post to self)
 //define('JQ_VERSION',isset($_POST['jq_version'])? $_POST['jq_version']:'1.8.3');
 //define('JM_VERSION',isset($_POST['jm_version'])? $_POST['jm_version']:'1.3.2');

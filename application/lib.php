@@ -1,7 +1,8 @@
 <?php
 /**
  * return the library information
- *
+ * $ret['container'] = 'list'; // specify the ui container to display the data
+ * $ret['content'] = $data;
  */
 
 //echo 'hello world';
