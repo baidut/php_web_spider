@@ -36,3 +36,7 @@ define('JM_VERSION',isset($_POST['jm_version'])? $_POST['jm_version']:'1.4.5');
 // This version have trouble fetching AJAX data(always post to self)
 //define('JQ_VERSION',isset($_POST['jq_version'])? $_POST['jq_version']:'1.8.3');
 //define('JM_VERSION',isset($_POST['jm_version'])? $_POST['jm_version']:'1.3.2');
+
+define('JQ_JS','http://code.jquery.com/jquery-'.JQ_VERSION.'.min.js');
+define('JM_CSS','http://code.jquery.com/mobile/'.JM_VERSION.'/jquery.mobile-'.JM_VERSION.'.min.css');
+define('JM_JS','http://code.jquery.com/mobile/'.JM_VERSION.'/jquery.mobile-'.JM_VERSION.'.min.js');

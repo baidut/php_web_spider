@@ -153,7 +153,7 @@ class ui_jQuery extends ui_Dom{
 	function __construct() {
         parent::__construct('html');
 
-        $this->head = $this->append('head','<script src="http://code.jquery.com/jquery-'.JQ_VERSION.'.min.js"></script>');
+        $this->head = $this->append('head','<script src="'.JQ_JS.'"></script>');
         $this->body = $this->append('body'); 
     }
 }
@@ -172,8 +172,9 @@ class ui_jQueryMobile extends ui_jQuery{
         parent::__construct();
         $this->head->appendText(
              '<meta name="viewport" content="width=device-width, initial-scale=1">
-              <link rel="stylesheet" href="http://code.jquery.com/mobile/'.JM_VERSION.'/jquery.mobile-'.JM_VERSION.'.min.css"/>
-              <script src="http://code.jquery.com/mobile/'.JM_VERSION.'/jquery.mobile-'.JM_VERSION.'.min.js"></script><script src="php_simple_ui.js"></script>');
+              <link rel="stylesheet" href="'.JM_CSS.'"/>
+              <script src="'.JM_JS.'"></script>
+              <script src="php_simple_ui.js"></script>');
         if(!is_null($pages)){
             if(is_array($pages)){
                 foreach($pages as $key => $page){

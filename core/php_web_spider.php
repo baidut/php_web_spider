@@ -316,6 +316,24 @@ class Spider{
           echo '解析出错'.$this-> error;
         }
     }
+    function fetch_results($url=null){
+        if($url) $this->fetch($url);
+
+        $html = str_get_html($this->html);
+        $results = $html->find('ul[class=Results]',0);
+//        echo $results; exit(0);
+        $data = array();
+        if(!empty($results)){
+            foreach($results->find('li') as $key => $result){
+                // todo  fix urls automatically (parse the base url from $url and html header or use snoopy instead of cURL)
+                $title = $result->find('h3',0);
+                $link =  $title-> find('a',0)->href; // todo use reference &
+                $title-> find('a',0)->href = 'http://ieeexplore.ieee.org'.$link;
+                $data[$key] = $title->innertext;
+            }
+        }
+        return $data;
+    }
 /*======================================================================*\
     Purpose:    
     获取页面核心内容
