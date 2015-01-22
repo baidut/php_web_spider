@@ -1,15 +1,17 @@
 <?php
 /**
- * html dom
- * @example 
- *  include('php_simple_ui.php');
- *  $ui = new ui_Dom('html');
- *  $body = $ui->append('body');
- *  $head = $ui->prepend('head');
- *  $head->html('<title>php_simple_ui</title>');
- *  $body->bgcolor = 'yellow';
- *  $body->append('input')->attr('type','button')->val('hello world'); // 链式
- *  echo $ui;
+ * return the library information
+ *
  */
 
-echo $_POST['student_no'].$_POST['lib_psw'];
+//echo 'hello world';
+//echo $_POST['student_no'].$_POST['lib_psw'];
+
+
+require_once('third_party/php_simple_ui/php_simple_ui.php');
+
+$books = array('当前借阅'=> array('php','js','jQuery','html'));
+
+$list = new ui_JMListView($books);
+
+echo $list;

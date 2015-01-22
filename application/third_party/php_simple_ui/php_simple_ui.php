@@ -5,7 +5,7 @@
  * 
  * @author    Zhenqiang Ying <https://github.com/baidut>
  * @example       
- * @todo      
+ * @todo
  */
 
 /**
@@ -19,7 +19,7 @@ require_once( defined('CONFIG_FILE')? CONFIG_FILE : 'config.php' );
 
 /**
  * html dom
- * @example 
+ * @example
  *  include('php_simple_ui.php');
  *  $ui = new ui_Dom('html');
  *  $body = $ui->append('body');
@@ -161,8 +161,8 @@ class ui_jQuery extends ui_Dom{
               type: "POST",
               url: obj.action,
               data: data,
-              success: function(data,status){alert("Data: " + data + "\nStatus: " + status);},
-              error: function(data,status){alert("Action: " + obj.action + formData);},
+              success: function(data,status){$(obj).after(data);$(obj).remove();},
+              error: function(data,status){alert("Data: " + data + "\nStatus: " + status);},
             });
             return false;
         }
@@ -221,6 +221,9 @@ class ui_jQueryMobile extends ui_jQuery{
                 if($key=='home')$page->header->append(new ui_JMDom('navbar',$nav));
             }
         }
+    }
+    function appendToolbar(){
+    // 与Navbar的区别为所有页面都显示，两个方法应当合并，另外页面也应当有此方法
     }
 }
 
@@ -288,8 +291,9 @@ class ui_JMPage extends ui_Dom{
 
         $this->footer = new ui_Dom('div');
         $this->footer->attr('data-role','footer')->text(
-             '<a href="#" data-role="button" data-icon="plus">'.TEXT_SHARE.'</a>'
-            .'<a href="javascript:history.go(-1)" data-role="button" data-icon="back">'.TEXT_BACK.'</a>'
+             // '<a href="#" data-role="button" data-icon="plus">'.TEXT_SHARE.'</a>'
+            // .
+            '<a href="javascript:history.go(-1)" data-role="button" data-icon="back">'.TEXT_BACK.'</a>'
             .'<a href="javascript:scroll(0,0)" data-role="button" data-icon="arrow-u">'.TEXT_BACK_TO_TOP.'</a>'
             .'<a href="#home" data-role="button" data-icon="home">'.TEXT_HOME.'</a>'
             );
@@ -341,6 +345,11 @@ class ui_JMListView extends ui_Dom{
 	// function appendDivider($title){
 	// 	$this->appendText('<li data-role="list-divider">'.$title.'</li>');
 	// }
+    /**
+     * @param array  $data  as <li>$data[i]</li>
+     * @param string $title as list-divider
+     * @todo  howtto remove the count, change ui
+     */
 	function appendList($data,$title=''){
 		// 自动追加计数气泡
 		if($title)$this->appendText('<li data-role="list-divider">'.$title.'<span class="ui-li-count">'.count($data).'</span></li>');

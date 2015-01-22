@@ -41,7 +41,7 @@ class Spider{
     Purpose:    reset spider
 \*======================================================================*/
     function reset(){
-        curl_setopt($this-> ch, CURLOPT_USERAGENT,     "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; .NET4.0E; .NET4.0C; InfoPath.3; rv:11.0) like Gecko"); //"kind spider"
+        // curl_setopt($this-> ch, CURLOPT_USERAGENT,     "kind spider"); //"kind spider""Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; .NET4.0E; .NET4.0C; InfoPath.3; rv:11.0) like Gecko"
         curl_setopt($this-> ch, CURLOPT_COOKIEJAR,      "./cookie.txt");
         curl_setopt($this-> ch, CURLOPT_RETURNTRANSFER, 1); // 如果设置了这项则curl_exec会在成功时返回内容
 // mixed curl_exec ( resource ch )
