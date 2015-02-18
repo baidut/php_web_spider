@@ -68,6 +68,7 @@ $authors = array(
     '罗佳佳'=>'Jiajia+Luo',
 
     '赵洋'=>'Yang+Zhao',
+//    '杨俊'=>'Jun+Yang',  // not in pku
 );
 // 没有处理分页的问题，只取了一页的数据
 set_time_limit(0);
